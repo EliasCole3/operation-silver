@@ -16,3 +16,18 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# mine
+dist/
+ignored/
+npm-debug.log
+**/*.sublime-workspace
+**/*.sublime-project
+**/*.mp4
+**/*.mpg
+**/*.mov
+**/*.mpeg
+**/*.zip
+**/*.ts
+**/*.idea
+**/*.iml
+**/*.jar

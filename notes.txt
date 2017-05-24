@@ -1,0 +1,3 @@
+todo:
+proper bundling of bootstrap css, instead of links to the latest in index.html
+
