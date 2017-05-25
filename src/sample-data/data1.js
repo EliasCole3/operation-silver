@@ -1,24 +1,27 @@
 let data = [
   {
-    id: '1',
+    id: 1,
     name: 'name1',
     color: 'brown',
     size: '14',
-    animationDirection: 'up'
+    animationDirection: 'up',
+    sortOrder: 1
   },
   {
-    id: '2',
+    id: 2,
     name: 'name2',
     color: 'blue',
     size: '12',
-    animationDirection: 'left'
+    animationDirection: 'left',
+    sortOrder: 2
   },
   {
-    id: '3',
+    id: 3,
     name: 'name3',
     color: 'green',
     size: '10',
-    animationDirection: 'right'
+    animationDirection: 'right',
+    sortOrder: 3
   }
 ]
 
