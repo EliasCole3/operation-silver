@@ -1,3 +1,25 @@
 todo:
 proper bundling of bootstrap css, instead of links to the latest in index.html
 
+
+
+
+
+
+
+
+
+
+
+let temparray = []
+for(let attr in $('#input-2')) {
+  temparray.push(attr)
+}
+temparray.sort()
+temparray.forEach(x => {
+  console.log(x)
+})
+console.log(temparray)
+
+$('#input-2').setAttribute('value', 'asdfg')
+
