@@ -125,10 +125,10 @@ class Row extends React.Component {
 
 
 class Cell extends React.Component {
-  constructor(props) {
-    super(props)
-    // this.state = {}
-  }
+  // constructor(props) {
+  //   super(props)
+  //   // this.state = {}
+  // }
 
   render() {
     return <td>{this.props.value}</td>
@@ -138,11 +138,11 @@ class Cell extends React.Component {
 
 
 class RowButton extends React.Component {
-  constructor(props) {
-    super(props)
-    // this.handleChange.bind(this)
-    // this.state = {}
-  }
+  // constructor(props) {
+  //   super(props)
+  //   // this.handleChange.bind(this)
+  //   // this.state = {}
+  // }
 
   // handleChange() {
   //   console.log(`button clicked`)
