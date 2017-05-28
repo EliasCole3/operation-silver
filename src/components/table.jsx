@@ -5,15 +5,17 @@ import { arraymove } from '../toolbox/array-methods.js'
 
 class Table extends React.Component {
   constructor(props) {
+
+    // calls the parent constructor
+    // if not included: Syntax error: 'this' is not allowed before super()
     super(props)
+
     this.state = {
       data: this.props.data,
       hiddenTableProperties: [
         'sortOrder'
       ]
     }
-
-    this.hiddenTableProperties 
   }
 
   // because the table holds all the data for the table, the handler to affect that data needs to be defined here
@@ -27,6 +29,25 @@ class Table extends React.Component {
     })
 
     newState = arraymove(newState, fromIndex, fromIndex-1)
+
+    // set the sortOrder to the array index
+    newState.forEach((x, i)=> {
+      x.sortOrder = i
+    })
+
+    this.setState({data: newState})
+  }
+
+  onMoveRowDownButtonClicked = e => {
+    let newState = this.state.data
+
+    let id = +e.target.getAttribute('data-object-id')
+
+    let fromIndex = newState.findIndex(x => {
+      return x.id === id
+    })
+
+    newState = arraymove(newState, fromIndex, fromIndex+1)
 
     // set the sortOrder to the array index
     newState.forEach((x, i)=> {
@@ -54,7 +75,13 @@ class Table extends React.Component {
     )
 
     let rows = this.state.data.map(x => {
-      return <Row data={x} key={x.id} onMoveRowUpButtonClicked={this.onMoveRowUpButtonClicked} hiddenTableProperties={this.state.hiddenTableProperties}/>
+      return (<Row 
+        data={x} 
+        key={x.id} 
+        onMoveRowUpButtonClicked={this.onMoveRowUpButtonClicked}
+        onMoveRowDownButtonClicked={this.onMoveRowDownButtonClicked}
+        hiddenTableProperties={this.state.hiddenTableProperties}
+      />)
     })
 
     let tbody = <tbody>{rows}</tbody>
@@ -77,21 +104,20 @@ class Row extends React.Component {
     this.state = {}
   }
 
-  // componentWillMount() {
-  //   console.log(this.props.onMoveRowUpButtonClicked)
-  // }
-
   render() {
     let cells = []
+
     for(let prop in this.props.data) {
       if(!this.props.hiddenTableProperties.includes(prop)) {
         cells.push(<Cell value={this.props.data[prop]} key={prop} />)
       }
     }
+
     let buttons = [
       <td key='up'><RowButton classes='button-move-row-up glyphicon glyphicon-arrow-up' objectId={this.props.data.id} clicked={this.props.onMoveRowUpButtonClicked} /></td>,
-      <td key='down'><RowButton classes='button-move-row-down glyphicon glyphicon-arrow-down' /></td>
+      <td key='down'><RowButton classes='button-move-row-down glyphicon glyphicon-arrow-down' objectId={this.props.data.id} clicked={this.props.onMoveRowDownButtonClicked} /></td>
     ]
+
     return <tr>{cells}{buttons}</tr>
   }
 }
@@ -101,7 +127,7 @@ class Row extends React.Component {
 class Cell extends React.Component {
   constructor(props) {
     super(props)
-    this.state = {}
+    // this.state = {}
   }
 
   render() {
@@ -114,13 +140,13 @@ class Cell extends React.Component {
 class RowButton extends React.Component {
   constructor(props) {
     super(props)
-    this.handleChange.bind(this)
-    this.state = {}
+    // this.handleChange.bind(this)
+    // this.state = {}
   }
 
-  handleChange() {
-    console.log(`button clicked`)
-  }
+  // handleChange() {
+  //   console.log(`button clicked`)
+  // }
 
   render() {
     let classes = `btn btn-small ${this.props.classes}`
