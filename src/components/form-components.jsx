@@ -2,24 +2,30 @@ import React from 'react'
 
 
 
-
-
-
-
 class Input extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      data: this.props.data
-    }
-  }
-
   buildComponent() {
     let input = (
-      <label>
-        { this.props.label }: 
-        <input type='text' value={this.state.value} onChange={this.props.handleChange} />
-      </label>
+      <span>
+        <label className='my-label'>{this.props.label}</label> <br />
+        <input type='text' name={this.props.name} className='my-form-control' value={this.props.value} onChange={this.props.handleChange} />
+      </span>
+    )
+
+    return input
+  }
+
+  render() {
+    return this.buildComponent()
+  }
+}
+
+class Textarea extends React.Component {
+  buildComponent() {
+    let input = (
+      <span>
+        <label className='my-label'>{ this.props.label }</label> <br />
+        <textarea type='text' name={this.props.name} className='my-form-control' value={this.props.value} onChange={this.props.handleChange} />
+      </span>
     )
 
     return input
@@ -32,22 +38,4 @@ class Input extends React.Component {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-export { Input }
+export { Input, Textarea }
