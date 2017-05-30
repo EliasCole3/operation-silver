@@ -1,28 +1,32 @@
-let data = [
-  {
-    id: 1,
-    name: 'name1',
-    color: 'brown',
-    size: '14',
-    animationDirection: 'up',
-    sortOrder: 1
-  },
-  {
-    id: 2,
-    name: 'name2',
-    color: 'blue',
-    size: '12',
-    animationDirection: 'left',
-    sortOrder: 2
-  },
-  {
-    id: 3,
-    name: 'name3',
-    color: 'green',
-    size: '10',
-    animationDirection: 'right',
-    sortOrder: 3
-  }
-]
+let data = {
+  data: [
+    {
+      id: 1,
+      company: 'name1',
+      description: 'brown',
+      jobTitle: 'Engineer',
+      notes: 'amazing',
+      sortOrder: 1
+    },
+    {
+      id: 2,
+      company: 'name2',
+      description: 'blue',
+      jobTitle: 'Engineer',
+      notes: 'amazing',
+      sortOrder: 2
+    },
+    {
+      id: 3,
+      company: 'name3',
+      description: 'green',
+      jobTitle: 'Engineer',
+      notes: 'amazing',
+      sortOrder: 3
+    }
+  ],
+  modalOpen: false,
+  lastId: 3
+}
 
 export { data }

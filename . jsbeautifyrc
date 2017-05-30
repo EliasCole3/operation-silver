@@ -1,0 +1,9 @@
+{
+  "space_before_conditional": false,
+  "beautify.language": {
+    "js": {
+      "type": ["javascript", "json"],
+      "ext": ["js", "json", "jsx"]
+    },
+  }
+}

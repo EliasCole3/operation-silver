@@ -59,6 +59,18 @@ class Table extends React.Component {
     
     this.props.deleteEntry(index)
   }
+
+  onUpdateRowButtonClicked = e => {
+    let newState = this.props.data
+    let id = +e.target.getAttribute('data-object-id')
+    let index = newState.findIndex(x => {
+      return x.id === id
+    })
+    
+    // this.props.deleteEntry(index)
+    // this.props.updateEntry(index, { test: 'test' })
+    this.props.showUpdateForm(index, { test: 'test' })
+  }
   
   buildTable() {
     // get column headers from the first object's properties
@@ -84,6 +96,7 @@ class Table extends React.Component {
         onMoveRowUpButtonClicked={this.onMoveRowUpButtonClicked}
         onMoveRowDownButtonClicked={this.onMoveRowDownButtonClicked}
         onDeleteRowButtonClicked={this.onDeleteRowButtonClicked}
+        onUpdateRowButtonClicked={this.onUpdateRowButtonClicked}
         hiddenTableProperties={this.state.hiddenTableProperties}
       />)
     })
@@ -116,11 +129,14 @@ class Row extends React.Component {
         cells.push(<Cell value={this.props.data[prop]} key={prop} />)
       }
     }
+    
+    
 
     let buttons = [
       <td key='up'><RowButton classes='button-move-row-up glyphicon glyphicon-arrow-up' objectId={this.props.data.id} clicked={this.props.onMoveRowUpButtonClicked} /></td>,
       <td key='down'><RowButton classes='button-move-row-down glyphicon glyphicon-arrow-down' objectId={this.props.data.id} clicked={this.props.onMoveRowDownButtonClicked} /></td>,
-      <td key='delete'><RowButton classes='button-delete-row glyphicon glyphicon-trash' objectId={this.props.data.id} clicked={this.props.onDeleteRowButtonClicked} /></td>
+      <td key='delete'><RowButton classes='button-delete-row glyphicon glyphicon-trash' objectId={this.props.data.id} clicked={this.props.onDeleteRowButtonClicked} /></td>,
+      <td key='update'><RowButton classes='button-update-row glyphicon glyphicon-edit' objectId={this.props.data.id} clicked={this.props.onUpdateRowButtonClicked} /></td>
     ]
 
     return <tr>{cells}{buttons}</tr>
