@@ -8,31 +8,47 @@ class NewEntryForm extends React.Component {
     super(props)
     this.state = {
       formControls: {
-        description: ''
+        company: '',
+        description: '',
+        jobTitle: '',
+        notes: ''
       }
     }
   }
 
   handleFormControlChange = event => {
-    let newState = {
-      formControls: {
-        [event.target.getAttribute('name')]: event.target.value
-      }
-    }
+    let newState = clone(this.state)
+    newState.formControls[event.target.getAttribute('name')] = event.target.value
     this.setState(newState)
   }
 
   submitForm = e => {
     let dataToSubmit = clone(this.state.formControls)
 
-    window.localStorage.setItem('operation-silver-new-entry', JSON.stringify(dataToSubmit))
+    let newId = JSON.parse(localStorage.getItem('operation-silver-last-id'))
+    newId++
+    localStorage.setItem('operation-silver-last-id', JSON.stringify(newId))
+    
+    // console.log(dataToSubmit)
+    // create new entry payload from form control data
+    let newEntry = {
+      id: newId,
+      company: dataToSubmit.company,
+      description: dataToSubmit.description,
+      jobTitle: dataToSubmit.jobTitle,
+      notes: dataToSubmit.notes,
+      sortOrder: newId
+    }
+
+    this.props.addNewEntryToData(newEntry)
+
+    // window.localStorage.setItem('operation-silver-new-entry', JSON.stringify(dataToSubmit))
 
     // clear the form fields
     let newState = clone(this.state)
     for(let prop in newState.formControls) {
       newState.formControls[prop] = ''
     }
-
     this.setState(newState)
   }
 

@@ -3,13 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "moment": "^2.18.1",
     "react": "^15.5.4",
     "react-bootstrap": "^0.31.0",
     "react-dom": "^15.5.4",
-    "react-simpletabs": "^0.7.0"
+    "react-redux": "^5.0.5",
+    "react-simpletabs": "^0.7.0",
+    "redux": "^3.6.0"
   },
   "devDependencies": {
-    "moment": "^2.18.1",
     "react-scripts": "0.9.5"
   },
   "scripts": {

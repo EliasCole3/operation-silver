@@ -20,14 +20,11 @@ class Table extends React.Component {
 
   // because the table holds all the data for the table, the handler to affect that data needs to be defined here
   onMoveRowUpButtonClicked = e => {
-    let newState = this.state.data
-
+    let newState = this.props.data
     let id = +e.target.getAttribute('data-object-id')
-
     let fromIndex = newState.findIndex(x => {
       return x.id === id
     })
-
     newState = arraymove(newState, fromIndex, fromIndex-1)
 
     // set the sortOrder to the array index
@@ -37,30 +34,36 @@ class Table extends React.Component {
 
     this.setState({data: newState})
   }
-
   onMoveRowDownButtonClicked = e => {
-    let newState = this.state.data
-
+    let newState = this.props.data
     let id = +e.target.getAttribute('data-object-id')
-
     let fromIndex = newState.findIndex(x => {
       return x.id === id
     })
-
-    newState = arraymove(newState, fromIndex, fromIndex+1)
+    newState = arraymove(newState, fromIndex, fromIndex + 1)
 
     // set the sortOrder to the array index
-    newState.forEach((x, i)=> {
+    newState.forEach((x, i) => {
       x.sortOrder = i
     })
 
-    this.setState({data: newState})
-  }
+    this.setState({ data: newState })
+  }  
 
+  onDeleteRowButtonClicked = e => {
+    let newState = this.props.data
+    let id = +e.target.getAttribute('data-object-id')
+    let index = newState.findIndex(x => {
+      return x.id === id
+    })
+    
+    this.props.deleteEntry(index)
+  }
+  
   buildTable() {
     // get column headers from the first object's properties
     let columnHeaders = []
-    for(let prop in this.state.data[0]) {
+    for(let prop in this.props.data[0]) {
       if(!this.state.hiddenTableProperties.includes(prop)) {
         columnHeaders.push(<th key={prop}>{prop}</th>)
       }
@@ -74,19 +77,20 @@ class Table extends React.Component {
       </thead>
     )
 
-    let rows = this.state.data.map(x => {
+    let rows = this.props.data.map(x => {
       return (<Row 
         data={x} 
         key={x.id} 
         onMoveRowUpButtonClicked={this.onMoveRowUpButtonClicked}
         onMoveRowDownButtonClicked={this.onMoveRowDownButtonClicked}
+        onDeleteRowButtonClicked={this.onDeleteRowButtonClicked}
         hiddenTableProperties={this.state.hiddenTableProperties}
       />)
     })
 
     let tbody = <tbody>{rows}</tbody>
 
-    let table = <table className='table'>{thead}{tbody}</table>
+    let table = <table id='table' className='table'>{thead}{tbody}</table>
 
     return table
   }
@@ -115,7 +119,8 @@ class Row extends React.Component {
 
     let buttons = [
       <td key='up'><RowButton classes='button-move-row-up glyphicon glyphicon-arrow-up' objectId={this.props.data.id} clicked={this.props.onMoveRowUpButtonClicked} /></td>,
-      <td key='down'><RowButton classes='button-move-row-down glyphicon glyphicon-arrow-down' objectId={this.props.data.id} clicked={this.props.onMoveRowDownButtonClicked} /></td>
+      <td key='down'><RowButton classes='button-move-row-down glyphicon glyphicon-arrow-down' objectId={this.props.data.id} clicked={this.props.onMoveRowDownButtonClicked} /></td>,
+      <td key='delete'><RowButton classes='button-delete-row glyphicon glyphicon-trash' objectId={this.props.data.id} clicked={this.props.onDeleteRowButtonClicked} /></td>
     ]
 
     return <tr>{cells}{buttons}</tr>

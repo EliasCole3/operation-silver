@@ -1,6 +1,6 @@
 .App {
   /*text-align: center;*/
-  width: 50%;
+  /*width: 50%;*/
 }
 
 .App-logo {
@@ -22,6 +22,21 @@
 @keyframes App-logo-spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+#table {
+  width: 70%;
+  float: left;
+}
+
+#state-box-wrapper {
+  width: 30%;
+  float: right;
+}
+
+#state-box {
+  width: 100%;
+  height: 500px;
 }
 
 .my-form-control {
@@ -59,3 +74,5 @@ td {
   height: 60px;
   vertical-align: top;
 }*/
+
+
