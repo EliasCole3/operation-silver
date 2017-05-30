@@ -26,7 +26,8 @@ let data = {
     }
   ],
   modalOpen: false,
-  lastId: 3
+  lastId: 3,
+  entryToUpdate: null
 }
 
 export { data }

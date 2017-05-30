@@ -69,7 +69,7 @@ class Table extends React.Component {
     
     // this.props.deleteEntry(index)
     // this.props.updateEntry(index, { test: 'test' })
-    this.props.showUpdateForm(index, { test: 'test' })
+    this.props.showUpdateForm(id, { test: 'test' })
   }
   
   buildTable() {

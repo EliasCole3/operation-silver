@@ -12,7 +12,7 @@ import * as bs from 'react-bootstrap'
 
 // internal dependencies
 import { Table } from './components/table.jsx'
-import { NewEntryForm } from './components/new-entry-form'
+import { CreateEntryForm, UpdateEntryForm } from './components/crud-forms'
 import { Modal } from './components/bs-modal-wrapper'
 // import * as main from './main.js'
 // import { Class1 } from './components/test-components'
@@ -26,9 +26,6 @@ import { data as testdata1 } from './sample-data/data1.js'
 
 
 class App extends Component {
-
-
-
   constructor(props) {
     super(props)
 
@@ -39,47 +36,72 @@ class App extends Component {
     }
 
     let localStorageState = JSON.parse(localStorage.getItem('operation-silver-data'))
+    console.log(localStorageState)
     let state
-    if(localStorageState === null || localStorageState.state.data.length === 0) {
+    if(localStorageState === null || localStorageState.data.length === 0) {
       state = testdata1
     } else {
-      state = localStorageState.state
+      state = localStorageState
     }
 
     this.state = state
   }
 
+  updateLocalStorage = () => {
+    console.log(this.state)
+    localStorage.setItem('operation-silver-data', JSON.stringify(this.state))
+  }
+
   addNewEntryToData = newEntry => {
     let newState = clone(this.state)
     newState.data.push(newEntry)
-    this.setState(newState)
-    localStorage.setItem('operation-silver-data', JSON.stringify(newState))
+    this.setState(newState, this.updateLocalStorage)
   }
 
   deleteEntry = index => {
     let newState = clone(this.state)
     newState.data.splice(index, 1)
-    this.setState(newState)
-    localStorage.setItem('operation-silver-data', JSON.stringify(newState))
+    this.setState(newState, this.updateLocalStorage)
   }
 
-  updateEntry = (index, data) => {
+  updateEntry = entry => {
     console.log('updating entry')
-    console.log(index)
-    console.log(data)
+    console.log(entry)
 
+    let newState = clone(this.state)
+    
+    let index = newState.data.findIndex(x => {
+      return x.id === entry.id
+    })
+
+    console.log(index)
+
+    console.log(newState.data[index])
+
+    for(let prop in entry) {
+      newState.data[index][prop] = entry[prop]
+    }
+
+    this.setState(newState, this.updateLocalStorage)
   }
 
-  showUpdateForm = (index) => {
-    this.setState({ modalOpen: true })
+  showUpdateForm = id => {
+    let entryToUpdate = this.state.data.filter(x => {
+      return x.id === id
+    })[0]
+    this.setState({
+      modalOpen: true,
+      entryToUpdate: entryToUpdate
+    }, this.updateLocalStorage)
   }
 
   showModal = () => {
-    this.setState({ modalOpen: true })
+    this.setState({ modalOpen: true }, this.updateLocalStorage)
   }
 
   closeModal = () => {
-    this.setState({ modalOpen: false })
+    this.setState({ modalOpen: false }, this.updateLocalStorage)
+    
   }
 
   render() {
@@ -113,8 +135,7 @@ class App extends Component {
                 {/*loadfile(data => { console.log(data) })*/ }
                 loadfile(data => {
                   let newState = JSON.parse(data)
-                  this.setState(newState)
-                  localStorage.setItem('operation-silver-data', JSON.stringify(newState))
+                  this.setState(newState, this.updateLocalStorage)
                 })
               }}
             >Load</button>
@@ -124,12 +145,7 @@ class App extends Component {
               show={this.state.modalOpen}
               close={this.closeModal}
               title={`Updating Entry`}
-              body={`asdfasdf`}
-              footer={(
-                <button className='btn btn-primary' onClick={e => { this.setState({ modalOpen: false }) }}>
-                  Save
-                </button> 
-              )}
+              body={<UpdateEntryForm entryToUpdate={this.state.entryToUpdate} updateEntry={this.updateEntry} closeModal={this.closeModal} />}
             />
             
 
@@ -139,7 +155,7 @@ class App extends Component {
 
 
           <Tabs.Panel title='New'>
-            <NewEntryForm addNewEntryToData={this.addNewEntryToData} />
+            <CreateEntryForm addNewEntryToData={this.addNewEntryToData} />
           </Tabs.Panel>
 
           <Tabs.Panel title='Single'>

@@ -23,3 +23,60 @@ console.log(temparray)
 
 $('#input-2').setAttribute('value', 'asdfg')
 
+window.localStorage.setItem('cts-ccData', JSON.stringify(ccData))
+let currentLanguage = window.localStorage.getItem('cts-last-selected-subtitle-language')
+
+
+
+
+
+
+
+
+
+
+
+
+  $('#save').click(e => {
+    let stateJson = JSON.stringify(State.getState())
+    let filename = `oras-state_${moment().format('MM_DD_YY_hh_mm_ss')}.json`
+    Utilities.save(stateJson, filename)
+  })
+
+  $('#load').click(() => {
+    $('#input-for-load').click()
+  })
+
+  $('#input-for-load').change(e => {
+    let reader = new FileReader()
+    reader.readAsText(e.currentTarget.files[0])
+
+    reader.onload = event => {
+      Lockr.set('oras-state', JSON.parse(event.target.result))
+      render()
+    }
+  })
+
+  static save(data, filename) {
+    if(typeof(data) === 'object') {
+      data = JSON.stringify(data)
+    }
+    let textFileAsBlob = new Blob([data], {type:'text/plain'})
+
+    let downloadLink = document.createElement('a')
+    downloadLink.download = filename
+    downloadLink.innerHTML = 'Download File'
+    if (window.URL != null)
+    {
+      downloadLink.href = window.URL.createObjectURL(textFileAsBlob)
+    }
+    else
+    {
+      downloadLink.href = window.URL.createObjectURL(textFileAsBlob)
+      downloadLink.onclick = destroyClickedElement
+      downloadLink.style.display = 'none'
+      document.body.appendChild(downloadLink)
+    }
+
+    downloadLink.click()
+  }
