@@ -16,6 +16,8 @@ import { NewEntryForm } from './components/new-entry-form'
 // import * as main from './main.js'
 // import { Class1 } from './components/test-components'
 import { clone } from './toolbox/clone'
+import { savefile } from './toolbox/savefile'
+import { loadfile } from './toolbox/loadfile'
 
 // data
 import { data as testdata1 } from './sample-data/data1.js'
@@ -67,15 +69,40 @@ class App extends Component {
       <div className='App'>
       
         <Tabs>
-          <Tabs.Panel title='New'>
-            <NewEntryForm addNewEntryToData={this.addNewEntryToData}/>
-          </Tabs.Panel>
 
           <Tabs.Panel title='Table'>
             <Table data={this.state.data} deleteEntry={this.deleteEntry}/>
+            
             <div id='state-box-wrapper'>
               <textarea id='state-box' value={JSON.stringify(this.state, '', 2)} onChange={e => {}}></textarea>
             </div>
+
+            <button
+              id='savefile'
+              className='btn btn-lg'
+              onClick={e => {
+                let filename = `silver-state_${moment().format('MM_DD_YY_hh_mm_ss')}.json`
+                savefile(JSON.stringify(this.state, '', 2), filename)
+              }}
+            >Save</button>
+
+            <button
+              id='loadfile'
+              className='btn btn-lg'
+              onClick={e => {
+                {/*loadfile(data => { console.log(data) })*/}
+                loadfile(data => {
+                  let newState = JSON.parse(data)
+                  this.setState(newState)
+                  localStorage.setItem('operation-silver-data', JSON.stringify(newState))
+                })
+              }}
+            >Load</button>
+
+          </Tabs.Panel>
+
+          <Tabs.Panel title='New'>
+            <NewEntryForm addNewEntryToData={this.addNewEntryToData}/>
           </Tabs.Panel>
 
           <Tabs.Panel title='Single'>
