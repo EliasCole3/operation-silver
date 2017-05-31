@@ -1,5 +1,17 @@
-todo:
+todo
+---------------------
 proper bundling of bootstrap css, instead of links to the latest in index.html
+
+
+Next features
+---------------------
+row selection
+pagination
+sort
+search
+single view
+Events
+molly guard delete
 
 
 

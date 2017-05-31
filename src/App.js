@@ -36,7 +36,7 @@ class App extends Component {
     }
 
     let localStorageState = JSON.parse(localStorage.getItem('operation-silver-data'))
-    console.log(localStorageState)
+    // console.log(localStorageState)
     let state
     if(localStorageState === null || localStorageState.data.length === 0) {
       state = testdata1
@@ -48,8 +48,12 @@ class App extends Component {
   }
 
   updateLocalStorage = () => {
-    console.log(this.state)
+    // console.log(this.state)
     localStorage.setItem('operation-silver-data', JSON.stringify(this.state))
+  }
+
+  updateGlobalState = newState => {
+    this.setState(newState, this.updateLocalStorage)
   }
 
   addNewEntryToData = newEntry => {
@@ -65,23 +69,13 @@ class App extends Component {
   }
 
   updateEntry = entry => {
-    console.log('updating entry')
-    console.log(entry)
-
     let newState = clone(this.state)
-    
     let index = newState.data.findIndex(x => {
       return x.id === entry.id
     })
-
-    console.log(index)
-
-    console.log(newState.data[index])
-
     for(let prop in entry) {
       newState.data[index][prop] = entry[prop]
     }
-
     this.setState(newState, this.updateLocalStorage)
   }
 
@@ -113,7 +107,15 @@ class App extends Component {
         <Tabs>
 
           <Tabs.Panel title='Table'>
-            <Table data={this.state.data} deleteEntry={this.deleteEntry} updateEntry={this.updateEntry} showUpdateForm={this.showUpdateForm} />
+
+            <Table 
+              data={this.state.data}
+              deleteEntry={this.deleteEntry}
+              updateEntry={this.updateEntry}
+              showUpdateForm={this.showUpdateForm}
+              updateGlobalState={this.updateGlobalState}
+              table={this.state.table}
+            />
 
             <div id='state-box-wrapper'>
               <textarea id='state-box' value={JSON.stringify(this.state, '', 2)} onChange={e => { }}></textarea>

@@ -27,7 +27,11 @@ let data = {
   ],
   modalOpen: false,
   lastId: 3,
-  entryToUpdate: null
+  entryToUpdate: null,
+  table: {
+    currentSortColumn: null,
+    currentSortDirection: 'ascending'
+  }
 }
 
 export { data }

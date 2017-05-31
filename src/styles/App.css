@@ -76,3 +76,15 @@ td {
 }*/
 
 
+.column-header {
+  background-color: aliceblue;
+}
+
+/*.column-header:active {
+  background-color: #e3f1fd;
+}*/
+
+.column-header-sorted {
+  background-color: #e3f1fd;
+}
+
