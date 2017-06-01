@@ -105,8 +105,13 @@ class Table extends React.Component {
   }
 
   buildTable() {
+    
+    // empty header cell for the row select
+    let columnHeaders = [
+      (<th key='row-selector'></th>)
+    ]
+
     // get column headers from the first object's properties
-    let columnHeaders = []
     for(let prop in this.props.data[0]) {
       if(!this.state.hiddenTableProperties.includes(prop)) {
         let className = this.props.table.currentSortColumn === prop ? 'column-header-sorted' : 'column-header'
@@ -131,13 +136,15 @@ class Table extends React.Component {
 
     let rows = this.props.data.map(x => {
       return (<Row
-        data={x}
+        entry={x}
         key={x.id}
         onMoveRowUpButtonClicked={this.onMoveRowUpButtonClicked}
         onMoveRowDownButtonClicked={this.onMoveRowDownButtonClicked}
         onDeleteRowButtonClicked={this.onDeleteRowButtonClicked}
         onUpdateRowButtonClicked={this.onUpdateRowButtonClicked}
         hiddenTableProperties={this.state.hiddenTableProperties}
+        table={this.props.table}
+        rowSelectorClicked={this.props.rowSelectorClicked}
       />)
     })
 
@@ -158,23 +165,38 @@ class Table extends React.Component {
 class Row extends React.Component {
   constructor(props) {
     super(props)
-    this.state = {}
+    // this.state = {}
   }
 
   render() {
     let cells = []
 
-    for(let prop in this.props.data) {
+    let checked = this.props.table.selectedEntryIds.includes(this.props.entry.id) ? true : false
+
+    cells.push(
+      <Cell key='row-selector'>
+        <input 
+          type='checkbox'
+          data-object-id={this.props.entry.id}
+          onChange={e => {
+            this.props.rowSelectorClicked(+e.target.getAttribute('data-object-id'))
+          }}
+          checked={checked}
+        />
+      </Cell>
+    )
+
+    for(let prop in this.props.entry) {
       if(!this.props.hiddenTableProperties.includes(prop)) {
-        cells.push(<Cell value={this.props.data[prop]} key={prop} />)
+        cells.push(<Cell value={this.props.entry[prop]} key={prop} />)
       }
     }
 
     let buttons = [
-      <td key='up'><RowButton classes='button-move-row-up glyphicon glyphicon-arrow-up' objectId={this.props.data.id} clicked={this.props.onMoveRowUpButtonClicked} /></td>,
-      <td key='down'><RowButton classes='button-move-row-down glyphicon glyphicon-arrow-down' objectId={this.props.data.id} clicked={this.props.onMoveRowDownButtonClicked} /></td>,
-      <td key='delete'><RowButton classes='button-delete-row glyphicon glyphicon-trash' objectId={this.props.data.id} clicked={this.props.onDeleteRowButtonClicked} /></td>,
-      <td key='update'><RowButton classes='button-update-row glyphicon glyphicon-edit' objectId={this.props.data.id} clicked={this.props.onUpdateRowButtonClicked} /></td>
+      <td key='up'><RowButton classes='button-move-row-up glyphicon glyphicon-arrow-up' objectId={this.props.entry.id} clicked={this.props.onMoveRowUpButtonClicked} /></td>,
+      <td key='down'><RowButton classes='button-move-row-down glyphicon glyphicon-arrow-down' objectId={this.props.entry.id} clicked={this.props.onMoveRowDownButtonClicked} /></td>,
+      <td key='delete'><RowButton classes='button-delete-row glyphicon glyphicon-trash' objectId={this.props.entry.id} clicked={this.props.onDeleteRowButtonClicked} /></td>,
+      <td key='update'><RowButton classes='button-update-row glyphicon glyphicon-edit' objectId={this.props.entry.id} clicked={this.props.onUpdateRowButtonClicked} /></td>
     ]
 
     return <tr>{cells}{buttons}</tr>
@@ -190,7 +212,7 @@ class Cell extends React.Component {
   // }
 
   render() {
-    return <td>{this.props.value}</td>
+    return <td>{this.props.value}{this.props.children}</td>
   }
 }
 

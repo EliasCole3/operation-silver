@@ -30,7 +30,8 @@ let data = {
   entryToUpdate: null,
   table: {
     currentSortColumn: null,
-    currentSortDirection: 'ascending'
+    currentSortDirection: 'ascending',
+    selectedEntryIds: [2]
   }
 }
 

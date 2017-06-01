@@ -95,7 +95,18 @@ class App extends Component {
 
   closeModal = () => {
     this.setState({ modalOpen: false }, this.updateLocalStorage)
-    
+  }
+
+  rowSelectorClicked = entryId => {
+    let newState = clone(this.state)
+
+    if(newState.table.selectedEntryIds.includes(entryId)) {
+      newState.table.selectedEntryIds = newState.table.selectedEntryIds.filter(x => { return x !== entryId })
+    } else {
+      newState.table.selectedEntryIds.push(entryId)
+    }
+
+    this.setState(newState, this.updateLocalStorage)
   }
 
   render() {
@@ -115,6 +126,7 @@ class App extends Component {
               showUpdateForm={this.showUpdateForm}
               updateGlobalState={this.updateGlobalState}
               table={this.state.table}
+              rowSelectorClicked={this.rowSelectorClicked}
             />
 
             <div id='state-box-wrapper'>

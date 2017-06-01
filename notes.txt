@@ -7,7 +7,6 @@ Next features
 ---------------------
 row selection
 pagination
-sort
 search
 single view
 Events
