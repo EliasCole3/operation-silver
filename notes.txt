@@ -5,7 +5,7 @@ proper bundling of bootstrap css, instead of links to the latest in index.html
 
 Next features
 ---------------------
-search
+gui tests for current features
 single view
 Events
 pagination
@@ -13,10 +13,18 @@ molly guard delete
 features using row selection
 
 
+node_modules/.bin/mocha --require setup.js *.spec.js
+node_modules/mocha/bin/mocha --require setup.js *.spec.js
+node_modules/mocha/bin/mocha
+node_modules/mocha/bin/mocha *.spec.js
+
+node_modules/.bin/quik
+
+node_modules/.bin/mocha --require ./tests/setup.js ./tests/*.spec.js
+node_modules/.bin/quik --run ./tests/index.js
 
 
-
-
+<pre><code></code></pre>
 
 
 
