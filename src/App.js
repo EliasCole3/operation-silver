@@ -52,8 +52,12 @@ class App extends Component {
     localStorage.setItem('operation-silver-data', JSON.stringify(this.state))
   }
 
-  updateGlobalState = newState => {
-    this.setState(newState, this.updateLocalStorage)
+  updateGlobalState = (newState, callback=null) => {
+    // this.setState(newState, this.updateLocalStorage)
+    this.setState(newState, () => {
+      this.updateLocalStorage()
+      if(callback) callback()
+    })
   }
 
   addNewEntryToData = newEntry => {

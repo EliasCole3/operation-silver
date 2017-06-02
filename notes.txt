@@ -5,12 +5,12 @@ proper bundling of bootstrap css, instead of links to the latest in index.html
 
 Next features
 ---------------------
-row selection
-pagination
 search
 single view
 Events
+pagination
 molly guard delete
+features using row selection
 
 
 
@@ -91,3 +91,19 @@ let currentLanguage = window.localStorage.getItem('cts-last-selected-subtitle-la
 
     downloadLink.click()
   }
+
+
+
+
+
+
+
+
+
+
+
+
+            // this is probably over kill right now, but it could be used in the future to hightlight specific instances of the seach term
+          // findPatternInData(this.props.data, regex, 'data', true)
+
+          {/*console.log(this.props.data)*/}

@@ -1,7 +1,7 @@
 import React from 'react'
 import { arraymove } from '../toolbox/array-methods'
-import {clone} from '../toolbox/clone'
-
+import { clone } from '../toolbox/clone'
+import { findPatternInData } from '../toolbox/find-pattern-in-data'
 
 class Table extends React.Component {
   constructor(props) {
@@ -12,6 +12,7 @@ class Table extends React.Component {
 
     this.state = {
       data: this.props.data,
+      table: this.props.table,
       hiddenTableProperties: [
         'sortOrder'
       ]
@@ -19,7 +20,7 @@ class Table extends React.Component {
   }
 
   onMoveRowUpButtonClicked = e => {
-    let data = this.props.data
+    let data = this.state.data
     let id = +e.target.getAttribute('data-object-id')
     let fromIndex = data.findIndex(x => {
       return x.id === id
@@ -31,10 +32,14 @@ class Table extends React.Component {
       x.sortOrder = i
     })
 
+    // for re-rendering
+    this.setState({ data: data })
+
+    // for persistence
     this.props.updateGlobalState({ data: data })
   }
   onMoveRowDownButtonClicked = e => {
-    let data = this.props.data
+    let data = this.state.data
     let id = +e.target.getAttribute('data-object-id')
     let fromIndex = data.findIndex(x => {
       return x.id === id
@@ -46,21 +51,25 @@ class Table extends React.Component {
       x.sortOrder = i
     })
 
+    this.setState({ data: data })
     this.props.updateGlobalState({ data: data })
   }
 
   onDeleteRowButtonClicked = e => {
-    let newState = this.props.data
+    // let newState = this.state.data
+    let newState = clone(this.state)
     let id = +e.target.getAttribute('data-object-id')
-    let index = newState.findIndex(x => {
+    let index = newState.data.findIndex(x => {
       return x.id === id
     })
 
-    this.props.deleteEntry(index)
+    // this.props.deleteEntry(index)
+    newState.data.splice(index, 1)
+    this.props.updateGlobalState(newState, this.resetTableState)
   }
 
   onUpdateRowButtonClicked = e => {
-    let newState = this.props.data
+    let newState = this.state.data
     let id = +e.target.getAttribute('data-object-id')
     let index = newState.findIndex(x => {
       return x.id === id
@@ -70,14 +79,15 @@ class Table extends React.Component {
   }
 
   sortColumn = column => {
-    // sort data in state
-    let newState = { 
-      data: clone(this.props.data),
-      table: {}
-    }
+    // let newState = {
+    //   data: clone(this.state.data),
+    //   table: {}
+    // }
+
+    let newState = clone(this.state)
 
     if(this.props.table.currentSortColumn === column && this.props.table.currentSortDirection === 'descending') {
-      
+
       // sort ascending
       newState.data.sort((x, y) => {
         if(x[column] > y[column]) return 1
@@ -101,18 +111,33 @@ class Table extends React.Component {
     newState.table.currentSortColumn = column
 
     // update state
-    this.props.updateGlobalState(newState)
+    // this.props.updateGlobalState(newState)
+    this.setState(newState)
+  }
+
+  // for children
+  updateTableState = newState => {
+    this.setState(newState)
+  }
+
+  resetTableState = (callback=null) => {
+    this.setState({
+      data: this.props.data,
+      table: this.props.table
+    }, () => {
+      if(callback) callback()
+    })
   }
 
   buildTable() {
-    
+
     // empty header cell for the row select
     let columnHeaders = [
       (<th key='row-selector'></th>)
     ]
 
     // get column headers from the first object's properties
-    for(let prop in this.props.data[0]) {
+    for(let prop in this.state.data[0]) {
       if(!this.state.hiddenTableProperties.includes(prop)) {
         let className = this.props.table.currentSortColumn === prop ? 'column-header-sorted' : 'column-header'
         columnHeaders.push(<th
@@ -134,7 +159,7 @@ class Table extends React.Component {
       </thead>
     )
 
-    let rows = this.props.data.map(x => {
+    let rows = this.state.data.map(x => {
       return (<Row
         entry={x}
         key={x.id}
@@ -152,13 +177,84 @@ class Table extends React.Component {
 
     let table = <table id='table' className='table'>{thead}{tbody}</table>
 
-    return table
+    let fullTable = (
+      <div id='table-wrapper'>
+        <ControlBar
+          data={this.state.data}
+          table={this.state.table}
+          updateTableState={this.updateTableState}
+          resetTableState={this.resetTableState}
+        />
+        {table}
+      </div>
+    )
+
+    return fullTable
   }
 
   render() {
     return this.buildTable()
   }
 }
+
+
+
+
+class ControlBar extends React.Component {
+  constructor(props) {
+    super(props)
+  }
+
+  render() {
+    return (
+      <div id='table-control-bar'>
+        <SearchBox
+          data={this.props.data}
+          table={this.props.table}
+          updateTableState={this.props.updateTableState}
+          resetTableState={this.props.resetTableState}
+        />
+      </div>
+    )
+  }
+}
+
+class SearchBox extends React.Component {
+  constructor(props) {
+    super(props)
+  }
+
+  search = searchString => {
+    let regex = new RegExp(searchString, 'i')
+
+    this.props.resetTableState(() => {
+      let data = this.props.data.filter(x => {
+        for(let prop in x) {
+          if(regex.test(x[prop])) return true
+        }
+        return false
+      })
+
+      this.props.updateTableState({
+        data: data
+      })
+    })
+  }
+
+  render() {
+    return (
+      <input
+        type='text'
+        className='my-form-control'
+        onChange={e => { this.search(e.target.value) }}
+      />
+    )
+  }
+}
+
+
+
+
 
 
 
@@ -175,7 +271,7 @@ class Row extends React.Component {
 
     cells.push(
       <Cell key='row-selector'>
-        <input 
+        <input
           type='checkbox'
           data-object-id={this.props.entry.id}
           onChange={e => {
@@ -202,6 +298,12 @@ class Row extends React.Component {
     return <tr>{cells}{buttons}</tr>
   }
 }
+
+
+
+
+
+
 
 
 
@@ -241,6 +343,7 @@ class RowButton extends React.Component {
     )
   }
 }
+
 
 
 export { Table }

@@ -31,7 +31,8 @@ let data = {
   table: {
     currentSortColumn: null,
     currentSortDirection: 'ascending',
-    selectedEntryIds: [2]
+    selectedEntryIds: [2],
+    searchString: ''
   }
 }
 
