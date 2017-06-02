@@ -5,131 +5,102 @@ import { findPatternInData } from '../toolbox/find-pattern-in-data'
 
 class Table extends React.Component {
   constructor(props) {
-
     // calls the parent constructor
     // if not included: Syntax error: 'this' is not allowed before super()
     super(props)
-
-    this.state = {
-      data: this.props.data,
-      table: this.props.table,
-      hiddenTableProperties: [
-        'sortOrder'
-      ]
-    }
   }
 
   onMoveRowUpButtonClicked = e => {
-    let data = this.state.data
+    let newState = clone(this.props)
     let id = +e.target.getAttribute('data-object-id')
-    let fromIndex = data.findIndex(x => {
+    let fromIndex = newState.data.findIndex(x => {
       return x.id === id
     })
-    data = arraymove(data, fromIndex, fromIndex - 1)
+    newState.data = arraymove(newState.data, fromIndex, fromIndex - 1)
 
     // set the sortOrder to the array index
-    data.forEach((x, i) => {
+    newState.data.forEach((x, i) => {
       x.sortOrder = i
     })
 
-    // for re-rendering
-    this.setState({ data: data })
-
-    // for persistence
-    this.props.updateGlobalState({ data: data })
+    this.props.updateGlobalState(newState)
   }
   onMoveRowDownButtonClicked = e => {
-    let data = this.state.data
+    let newState = clone(this.props)
     let id = +e.target.getAttribute('data-object-id')
-    let fromIndex = data.findIndex(x => {
+    let fromIndex = newState.data.findIndex(x => {
       return x.id === id
     })
-    data = arraymove(data, fromIndex, fromIndex + 1)
+    newState.data = arraymove(newState.data, fromIndex, fromIndex + 1)
 
     // set the sortOrder to the array index
-    data.forEach((x, i) => {
+    newState.data.forEach((x, i) => {
       x.sortOrder = i
     })
 
-    this.setState({ data: data })
-    this.props.updateGlobalState({ data: data })
+    this.props.updateGlobalState(newState)
   }
 
   onDeleteRowButtonClicked = e => {
-    // let newState = this.state.data
-    let newState = clone(this.state)
+    let newState = clone(this.props)
     let id = +e.target.getAttribute('data-object-id')
     let index = newState.data.findIndex(x => {
       return x.id === id
     })
 
-    // this.props.deleteEntry(index)
-    newState.data.splice(index, 1)
-    this.props.updateGlobalState(newState, this.resetTableState)
+    this.props.deleteEntry(index)
   }
 
   onUpdateRowButtonClicked = e => {
-    let newState = this.state.data
     let id = +e.target.getAttribute('data-object-id')
-    let index = newState.findIndex(x => {
+    let index = this.props.data.findIndex(x => {
       return x.id === id
     })
-
-    this.props.showUpdateForm(id, { test: 'test' })
+    this.props.showUpdateForm(id)
   }
 
   sortColumn = column => {
-    // let newState = {
-    //   data: clone(this.state.data),
-    //   table: {}
-    // }
-
-    let newState = clone(this.state)
+    let newState = clone(this.props)
 
     if(this.props.table.currentSortColumn === column && this.props.table.currentSortDirection === 'descending') {
-
-      // sort ascending
       newState.data.sort((x, y) => {
+        // sort ascending
         if(x[column] > y[column]) return 1
         if(x[column] < y[column]) return -1
         return 0
       })
       newState.table.currentSortDirection = 'ascending'
-
     } else {
-
-      // sort descending
       newState.data.sort((x, y) => {
+        // sort descending
         if(x[column] > y[column]) return -1
         if(x[column] < y[column]) return 1
         return 0
       })
       newState.table.currentSortDirection = 'descending'
-
     }
 
     newState.table.currentSortColumn = column
 
-    // update state
-    // this.props.updateGlobalState(newState)
-    this.setState(newState)
-  }
-
-  // for children
-  updateTableState = newState => {
-    this.setState(newState)
-  }
-
-  resetTableState = (callback=null) => {
-    this.setState({
-      data: this.props.data,
-      table: this.props.table
-    }, () => {
-      if(callback) callback()
-    })
+    this.props.updateGlobalState(newState)
   }
 
   buildTable() {
+    let data = clone(this.props.data)
+
+    // filter the table data down based on the search string
+    if(this.props.table.searchString !== '') {
+      console.log(`current search string: '${this.props.table.searchString}'`)
+
+      let regex = new RegExp(this.props.table.searchString, 'i')
+
+      data = data.filter(x => {
+        for(let prop in x) {
+          if(regex.test(x[prop])) return true
+        }
+        return false
+      })
+    }
 
     // empty header cell for the row select
     let columnHeaders = [
@@ -137,17 +108,21 @@ class Table extends React.Component {
     ]
 
     // get column headers from the first object's properties
-    for(let prop in this.state.data[0]) {
-      if(!this.state.hiddenTableProperties.includes(prop)) {
+    for(let prop in data[0]) {
+      if(!this.props.table.hiddenTableProperties.includes(prop)) {
         let className = this.props.table.currentSortColumn === prop ? 'column-header-sorted' : 'column-header'
-        columnHeaders.push(<th
-          className={className}
-          key={prop}
-          name={prop}
-          onClick={e => {
-            this.sortColumn(e.target.getAttribute('name'))
-          }}
-        >{prop}</th>)
+        columnHeaders.push(
+          <th
+            className={className}
+            key={prop}
+            name={prop}
+            onClick={e => {
+              this.sortColumn(e.target.getAttribute('name'))
+            }}
+          >
+            {prop}
+          </th>
+        )
       }
     }
 
@@ -159,18 +134,20 @@ class Table extends React.Component {
       </thead>
     )
 
-    let rows = this.state.data.map(x => {
-      return (<Row
-        entry={x}
-        key={x.id}
-        onMoveRowUpButtonClicked={this.onMoveRowUpButtonClicked}
-        onMoveRowDownButtonClicked={this.onMoveRowDownButtonClicked}
-        onDeleteRowButtonClicked={this.onDeleteRowButtonClicked}
-        onUpdateRowButtonClicked={this.onUpdateRowButtonClicked}
-        hiddenTableProperties={this.state.hiddenTableProperties}
-        table={this.props.table}
-        rowSelectorClicked={this.props.rowSelectorClicked}
-      />)
+    let rows = data.map(x => {
+      return (
+        <Row
+          entry={x}
+          key={x.id}
+          onMoveRowUpButtonClicked={this.onMoveRowUpButtonClicked}
+          onMoveRowDownButtonClicked={this.onMoveRowDownButtonClicked}
+          onDeleteRowButtonClicked={this.onDeleteRowButtonClicked}
+          onUpdateRowButtonClicked={this.onUpdateRowButtonClicked}
+          hiddenTableProperties={this.props.table.hiddenTableProperties}
+          table={this.props.table}
+          rowSelectorClicked={this.props.rowSelectorClicked}
+        />
+      )
     })
 
     let tbody = <tbody>{rows}</tbody>
@@ -180,10 +157,9 @@ class Table extends React.Component {
     let fullTable = (
       <div id='table-wrapper'>
         <ControlBar
-          data={this.state.data}
-          table={this.state.table}
-          updateTableState={this.updateTableState}
-          resetTableState={this.resetTableState}
+          data={this.props.data}
+          table={this.props.table}
+          updateGlobalState={this.props.updateGlobalState}
         />
         {table}
       </div>
@@ -211,8 +187,7 @@ class ControlBar extends React.Component {
         <SearchBox
           data={this.props.data}
           table={this.props.table}
-          updateTableState={this.props.updateTableState}
-          resetTableState={this.props.resetTableState}
+          updateGlobalState={this.props.updateGlobalState}
         />
       </div>
     )
@@ -225,20 +200,9 @@ class SearchBox extends React.Component {
   }
 
   search = searchString => {
-    let regex = new RegExp(searchString, 'i')
-
-    this.props.resetTableState(() => {
-      let data = this.props.data.filter(x => {
-        for(let prop in x) {
-          if(regex.test(x[prop])) return true
-        }
-        return false
-      })
-
-      this.props.updateTableState({
-        data: data
-      })
-    })
+    let table = clone(this.props.table)
+    table.searchString = searchString
+    this.props.updateGlobalState({table: table})
   }
 
   render() {

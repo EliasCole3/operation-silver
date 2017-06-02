@@ -36,7 +36,6 @@ class App extends Component {
     }
 
     let localStorageState = JSON.parse(localStorage.getItem('operation-silver-data'))
-    // console.log(localStorageState)
     let state
     if(localStorageState === null || localStorageState.data.length === 0) {
       state = testdata1
@@ -162,8 +161,14 @@ class App extends Component {
             <Modal 
               show={this.state.modalOpen}
               close={this.closeModal}
-              title={`Updating Entry`}
-              body={<UpdateEntryForm entryToUpdate={this.state.entryToUpdate} updateEntry={this.updateEntry} closeModal={this.closeModal} />}
+              title={`Updating Entry ${this.state.entryToUpdate === null ? '' : this.state.entryToUpdate.id}`}
+              body={
+                <UpdateEntryForm
+                  entryToUpdate={this.state.entryToUpdate}
+                  updateEntry={this.updateEntry}
+                  closeModal={this.closeModal}
+                />
+              }
             />
             
 

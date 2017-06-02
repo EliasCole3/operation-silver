@@ -32,7 +32,10 @@ let data = {
     currentSortColumn: null,
     currentSortDirection: 'ascending',
     selectedEntryIds: [2],
-    searchString: ''
+    searchString: '',
+    hiddenTableProperties: [
+      'sortOrder'
+    ]
   }
 }
 

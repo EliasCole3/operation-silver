@@ -103,7 +103,11 @@ let currentLanguage = window.localStorage.getItem('cts-last-selected-subtitle-la
 
 
 
-            // this is probably over kill right now, but it could be used in the future to hightlight specific instances of the seach term
-          // findPatternInData(this.props.data, regex, 'data', true)
+// this is probably over kill right now, but it could be used in the future to hightlight specific instances of the seach term
+// findPatternInData(this.props.data, regex, 'data', true)
 
-          {/*console.log(this.props.data)*/}
+{/*console.log(this.props.data)*/}
+
+
+
+
