@@ -237,6 +237,7 @@ class Row extends React.Component {
       <Cell key='row-selector'>
         <input
           type='checkbox'
+          className='row-selector-checkbox'
           data-object-id={this.props.entry.id}
           onChange={e => {
             this.props.rowSelectorClicked(+e.target.getAttribute('data-object-id'))
@@ -268,15 +269,7 @@ class Row extends React.Component {
 
 
 
-
-
-
 class Cell extends React.Component {
-  // constructor(props) {
-  //   super(props)
-  //   // this.state = {}
-  // }
-
   render() {
     return <td>{this.props.value}{this.props.children}</td>
   }
@@ -285,16 +278,6 @@ class Cell extends React.Component {
 
 
 class RowButton extends React.Component {
-  // constructor(props) {
-  //   super(props)
-  //   // this.handleChange.bind(this)
-  //   // this.state = {}
-  // }
-
-  // handleChange() {
-  //   console.log(`button clicked`)
-  // }
-
   render() {
     let classes = `btn btn-small ${this.props.classes}`
 

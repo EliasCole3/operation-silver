@@ -88,3 +88,6 @@ td {
   background-color: #e3f1fd;
 }
 
+.row-selector-checkbox {
+  transform: scale(2);
+}

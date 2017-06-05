@@ -3,6 +3,6 @@ import ReactDOM from 'react-dom'
 import { BeerListContainer } from './components'
 
 
-let Hello = () => <span>Hi</span>
+// let Hello = () => <span>Hi</span>
 
 ReactDOM.render(<BeerListContainer />, document.querySelector('#root'))
