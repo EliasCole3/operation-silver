@@ -25,11 +25,8 @@ class CreateEntryForm extends React.Component {
   submitForm = e => {
     let dataToSubmit = clone(this.state.formControls)
 
-    let newId = JSON.parse(localStorage.getItem('operation-silver-last-id'))
-    newId++
-    localStorage.setItem('operation-silver-last-id', JSON.stringify(newId))
-    
     // create new entry payload from form control data
+    let newId = this.props.getNewId()
     let newEntry = {
       id: newId,
       company: dataToSubmit.company,
@@ -51,10 +48,10 @@ class CreateEntryForm extends React.Component {
 
   buildForm() {
     let form = (<span>
-      <Input label='Company' name='company' value={this.state.formControls.company} handleChange={this.handleFormControlChange} /> <br/>
-      <Textarea label='Description' name='description' value={this.state.formControls.description} handleChange={this.handleFormControlChange} /> <br/>
-      <Input label='Job Title' name='jobTitle' value={this.state.formControls.jobTitle} handleChange={this.handleFormControlChange} /> <br/>
-      <Textarea label='Notes' name='notes' value={this.state.formControls.notes} handleChange={this.handleFormControlChange} /> <br/>
+      <Input id='new-form-company' label='Company' name='company' value={this.state.formControls.company} handleChange={this.handleFormControlChange} /> <br/>
+      <Textarea id='new-form-description' label='Description' name='description' value={this.state.formControls.description} handleChange={this.handleFormControlChange} /> <br/>
+      <Input id='new-form-job-title' label='Job Title' name='jobTitle' value={this.state.formControls.jobTitle} handleChange={this.handleFormControlChange} /> <br/>
+      <Textarea id='new-form-notes' label='Notes' name='notes' value={this.state.formControls.notes} handleChange={this.handleFormControlChange} /> <br/>
 
       <button id='submit-new-entry' className='btn btn-lg' onClick={this.submitForm}>Submit</button>
     </span>)
@@ -68,15 +65,17 @@ class CreateEntryForm extends React.Component {
 }
 
 CreateEntryForm.propTypes = {
-  addNewEntryToData: React.PropTypes.func.isRequired
+  addNewEntryToData: React.PropTypes.func.isRequired,
+  getNewId: React.PropTypes.func.isRequired
 }
+
+
 
 
 
 class UpdateEntryForm extends React.Component {
   constructor(props) {
     super(props)
-    // console.log(this.props)
     this.state = {
       formControls: {
         company: this.props.entryToUpdate.company,
@@ -113,17 +112,18 @@ class UpdateEntryForm extends React.Component {
     }
     this.setState(newState)
     
-    this.props.closeModal()
+    this.props.afterUpdate()
   }
+
 
   buildForm() {
     let form = (<span>
-      <Input label='Company' name='company' value={this.state.formControls.company} handleChange={this.handleFormControlChange} /> <br/>
-      <Textarea label='Description' name='description' value={this.state.formControls.description} handleChange={this.handleFormControlChange} /> <br/>
-      <Input label='Job Title' name='jobTitle' value={this.state.formControls.jobTitle} handleChange={this.handleFormControlChange} /> <br/>
-      <Textarea label='Notes' name='notes' value={this.state.formControls.notes} handleChange={this.handleFormControlChange} /> <br/>
+      <Input id='update-form-company' label='Company' name='company' value={this.state.formControls.company} handleChange={this.handleFormControlChange} /> <br/>
+      <Textarea id='update-form-description' label='Description' name='description' value={this.state.formControls.description} handleChange={this.handleFormControlChange} /> <br/>
+      <Input id='update-form-job-title' label='Job Title' name='jobTitle' value={this.state.formControls.jobTitle} handleChange={this.handleFormControlChange} /> <br/>
+      <Textarea id='update-form-notes' label='Notes' name='notes' value={this.state.formControls.notes} handleChange={this.handleFormControlChange} /> <br/>
 
-      <button id='submit-new-entry' className='btn btn-lg' onClick={this.submitForm}>Submit</button>
+      <button id='submit-updated-entry' className='btn btn-lg' onClick={this.submitForm}>Submit</button>
     </span>)
 
     return form
@@ -134,7 +134,11 @@ class UpdateEntryForm extends React.Component {
   }
 }
 
-
+UpdateEntryForm.propTypes = {
+  entryToUpdate: React.PropTypes.object.isRequired,
+  updateEntry: React.PropTypes.func.isRequired,
+  afterUpdate: React.PropTypes.func.isRequired
+}
 
 
 

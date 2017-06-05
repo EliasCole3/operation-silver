@@ -7,7 +7,7 @@ class Input extends React.Component {
     let input = (
       <span>
         <label className='my-label'>{this.props.label}</label> <br />
-        <input type='text' name={this.props.name} className='my-form-control' value={this.props.value} onChange={this.props.handleChange} />
+        <input id={this.props.id} type='text' name={this.props.name} className='my-form-control' value={this.props.value} onChange={this.props.handleChange} />
       </span>
     )
 
@@ -20,10 +20,11 @@ class Input extends React.Component {
 }
 
 Input.propTypes = {
+  id: React.PropTypes.string.isRequired,
   label: React.PropTypes.string.isRequired,
   name: React.PropTypes.string.isRequired,
   value: React.PropTypes.node.isRequired,
-  onChange: React.PropTypes.func.isRequired
+  handleChange: React.PropTypes.func.isRequired
 }
 
 
@@ -33,7 +34,7 @@ class Textarea extends React.Component {
     let input = (
       <span>
         <label className='my-label'>{ this.props.label }</label> <br />
-        <textarea type='text' name={this.props.name} className='my-form-control' value={this.props.value} onChange={this.props.handleChange} />
+        <textarea id={this.props.id} type='text' name={this.props.name} className='my-form-control' value={this.props.value} onChange={this.props.handleChange} />
       </span>
     )
 
@@ -46,10 +47,11 @@ class Textarea extends React.Component {
 }
 
 Textarea.propTypes = {
+  id: React.PropTypes.string.isRequired,
   label: React.PropTypes.string.isRequired,
   name: React.PropTypes.string.isRequired,
   value: React.PropTypes.node.isRequired,
-  onChange: React.PropTypes.func.isRequired
+  handleChange: React.PropTypes.func.isRequired
 }
 
 

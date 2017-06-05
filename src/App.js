@@ -112,6 +112,13 @@ class App extends Component {
     this.setState(newState, this.updateLocalStorage)
   }
 
+  getNewId = () => {
+    let newId = JSON.parse(localStorage.getItem('operation-silver-last-id'))
+    newId++
+    localStorage.setItem('operation-silver-last-id', JSON.stringify(newId))
+    return newId
+  }
+
   render() {
     return (
       <div className='App'>
@@ -166,7 +173,9 @@ class App extends Component {
                 <UpdateEntryForm
                   entryToUpdate={this.state.entryToUpdate}
                   updateEntry={this.updateEntry}
-                  closeModal={this.closeModal}
+                  afterUpdate={() => {
+                    this.closeModal()
+                  }}
                 />
               }
             />
@@ -178,7 +187,10 @@ class App extends Component {
 
 
           <Tabs.Panel title='New'>
-            <CreateEntryForm addNewEntryToData={this.addNewEntryToData} />
+            <CreateEntryForm
+              addNewEntryToData={this.addNewEntryToData}
+              getNewId={this.getNewId}
+            />
           </Tabs.Panel>
 
           <Tabs.Panel title='Single'>
