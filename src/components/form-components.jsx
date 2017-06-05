@@ -19,6 +19,15 @@ class Input extends React.Component {
   }
 }
 
+Input.propTypes = {
+  label: React.PropTypes.string.isRequired,
+  name: React.PropTypes.string.isRequired,
+  value: React.PropTypes.node.isRequired,
+  onChange: React.PropTypes.func.isRequired
+}
+
+
+
 class Textarea extends React.Component {
   buildComponent() {
     let input = (
@@ -36,6 +45,12 @@ class Textarea extends React.Component {
   }
 }
 
+Textarea.propTypes = {
+  label: React.PropTypes.string.isRequired,
+  name: React.PropTypes.string.isRequired,
+  value: React.PropTypes.node.isRequired,
+  onChange: React.PropTypes.func.isRequired
+}
 
 
 export { Input, Textarea }

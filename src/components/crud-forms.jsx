@@ -29,7 +29,6 @@ class CreateEntryForm extends React.Component {
     newId++
     localStorage.setItem('operation-silver-last-id', JSON.stringify(newId))
     
-    // console.log(dataToSubmit)
     // create new entry payload from form control data
     let newEntry = {
       id: newId,
@@ -41,8 +40,6 @@ class CreateEntryForm extends React.Component {
     }
 
     this.props.addNewEntryToData(newEntry)
-
-    // window.localStorage.setItem('operation-silver-new-entry', JSON.stringify(dataToSubmit))
 
     // clear the form fields
     let newState = clone(this.state)
@@ -68,6 +65,10 @@ class CreateEntryForm extends React.Component {
   render() {
     return this.buildForm()
   }
+}
+
+CreateEntryForm.propTypes = {
+  addNewEntryToData: React.PropTypes.func.isRequired
 }
 
 
