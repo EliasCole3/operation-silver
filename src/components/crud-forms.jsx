@@ -1,6 +1,7 @@
 import React from 'react'
 import { Input, Textarea } from './form-components'
 import { clone } from '../toolbox/clone'
+import { PropTypes } from 'prop-types'
 
 
 class CreateEntryForm extends React.Component {
@@ -65,8 +66,8 @@ class CreateEntryForm extends React.Component {
 }
 
 CreateEntryForm.propTypes = {
-  addNewEntryToData: React.PropTypes.func.isRequired,
-  getNewId: React.PropTypes.func.isRequired
+  addNewEntryToData: PropTypes.func.isRequired,
+  getNewId: PropTypes.func.isRequired
 }
 
 
@@ -135,9 +136,9 @@ class UpdateEntryForm extends React.Component {
 }
 
 UpdateEntryForm.propTypes = {
-  entryToUpdate: React.PropTypes.object.isRequired,
-  updateEntry: React.PropTypes.func.isRequired,
-  afterUpdate: React.PropTypes.func.isRequired
+  entryToUpdate: PropTypes.object.isRequired,
+  updateEntry: PropTypes.func.isRequired,
+  afterUpdate: PropTypes.func.isRequired
 }
 
 

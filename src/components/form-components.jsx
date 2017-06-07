@@ -1,5 +1,5 @@
 import React from 'react'
-
+import { PropTypes } from 'prop-types'
 
 
 class Input extends React.Component {
@@ -20,11 +20,11 @@ class Input extends React.Component {
 }
 
 Input.propTypes = {
-  id: React.PropTypes.string.isRequired,
-  label: React.PropTypes.string.isRequired,
-  name: React.PropTypes.string.isRequired,
-  value: React.PropTypes.node.isRequired,
-  handleChange: React.PropTypes.func.isRequired
+  id: PropTypes.string.isRequired,
+  label: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  value: PropTypes.node.isRequired,
+  handleChange: PropTypes.func.isRequired
 }
 
 
@@ -47,11 +47,11 @@ class Textarea extends React.Component {
 }
 
 Textarea.propTypes = {
-  id: React.PropTypes.string.isRequired,
-  label: React.PropTypes.string.isRequired,
-  name: React.PropTypes.string.isRequired,
-  value: React.PropTypes.node.isRequired,
-  handleChange: React.PropTypes.func.isRequired
+  id: PropTypes.string.isRequired,
+  label: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  value: PropTypes.node.isRequired,
+  handleChange: PropTypes.func.isRequired
 }
 
 

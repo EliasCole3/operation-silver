@@ -17,24 +17,26 @@ describe('The base setup', () => {
 
 
 describe('CreateEntryForm', () => {
-  it('should render an Input and Textarea', () => {
-    const wrapper = getMockForNewEntryTests()
 
-    // this doesn't work...
-    // expect(wrapper.containsAllMatchingElements([
-    //   <Input />,
-    //   <Textarea />
-    // ])).to.equal(true)
+  // I don't really feel a need to test this. I rarely have HTML problems
+  // it('should render an Input and Textarea', () => {
+  //   const wrapper = getMockForNewEntryTests()
 
-    // ...but these do. WTH?
-    expect(wrapper.containsMatchingElement(
-      <Input />
-    )).to.equal(true)
+  //   // this doesn't work...
+  //   // expect(wrapper.containsAllMatchingElements([
+  //   //   <Input />,
+  //   //   <Textarea />
+  //   // ])).to.equal(true)
 
-    expect(wrapper.containsMatchingElement(
-      <Textarea />
-    )).to.equal(true)
-  })
+  //   // ...but these do. WTH?
+  //   expect(wrapper.containsMatchingElement(
+  //     <Input />
+  //   )).to.equal(true)
+
+  //   expect(wrapper.containsMatchingElement(
+  //     <Textarea />
+  //   )).to.equal(true)
+  // })
 
   it('should start with empty properties', () => {
     const wrapper = getMockForNewEntryTests()

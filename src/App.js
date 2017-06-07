@@ -8,7 +8,7 @@ import './styles/react-simpletabs.css'
 // external libraries
 import Tabs from 'react-simpletabs'
 const moment = require('moment')
-import * as bs from 'react-bootstrap'
+// import * as bs from 'react-bootstrap'
 
 // internal dependencies
 import { Table } from './components/table.jsx'
@@ -156,7 +156,6 @@ class App extends Component {
               id='loadfile'
               className='btn btn-lg'
               onClick={e => {
-                {/*loadfile(data => { console.log(data) })*/ }
                 loadfile(data => {
                   let newState = JSON.parse(data)
                   this.setState(newState, this.updateLocalStorage)

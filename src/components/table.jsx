@@ -1,14 +1,14 @@
 import React from 'react'
 import { arraymove } from '../toolbox/array-methods'
 import { clone } from '../toolbox/clone'
-import { findPatternInData } from '../toolbox/find-pattern-in-data'
+// import { findPatternInData } from '../toolbox/find-pattern-in-data'
 
 class Table extends React.Component {
-  constructor(props) {
-    // calls the parent constructor
-    // if not included: Syntax error: 'this' is not allowed before super()
-    super(props)
-  }
+  // constructor(props) {
+  //   // calls the parent constructor
+  //   // if not included: Syntax error: 'this' is not allowed before super()
+  //   super(props)
+  // }
 
   onMoveRowUpButtonClicked = e => {
     let newState = clone(this.props)
@@ -53,9 +53,9 @@ class Table extends React.Component {
 
   onUpdateRowButtonClicked = e => {
     let id = +e.target.getAttribute('data-object-id')
-    let index = this.props.data.findIndex(x => {
-      return x.id === id
-    })
+    // let index = this.props.data.findIndex(x => {
+    //   return x.id === id
+    // })
     this.props.showUpdateForm(id)
   }
 
@@ -177,9 +177,9 @@ class Table extends React.Component {
 
 
 class ControlBar extends React.Component {
-  constructor(props) {
-    super(props)
-  }
+  // constructor(props) {
+  //   super(props)
+  // }
 
   render() {
     return (
@@ -195,9 +195,9 @@ class ControlBar extends React.Component {
 }
 
 class SearchBox extends React.Component {
-  constructor(props) {
-    super(props)
-  }
+  // constructor(props) {
+  //   super(props)
+  // }
 
   search = searchString => {
     let table = clone(this.props.table)
@@ -223,10 +223,10 @@ class SearchBox extends React.Component {
 
 
 class Row extends React.Component {
-  constructor(props) {
-    super(props)
-    // this.state = {}
-  }
+  // constructor(props) {
+  //   super(props)
+  //   // this.state = {}
+  // }
 
   render() {
     let cells = []
