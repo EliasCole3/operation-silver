@@ -91,3 +91,10 @@ td {
 .row-selector-checkbox {
   transform: scale(2);
 }
+
+#reload-state-from-local-storage-button {
+  /*display: none;*/
+  background: transparent;
+  border: none !important;
+  font-size:0;
+}

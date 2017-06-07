@@ -38,6 +38,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "install": "selenium-standalone install",
+    "selen": "selenium-standalone start",
+    "gui-tests": "wdio ./gui-tests/wdio.conf.js"
   }
 }

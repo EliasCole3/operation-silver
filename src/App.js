@@ -38,12 +38,23 @@ class App extends Component {
     let localStorageState = JSON.parse(localStorage.getItem('operation-silver-data'))
     let state
     if(localStorageState === null || localStorageState.data.length === 0) {
+      console.log(`failed to retrieve data from local storage, loading data from test file`)
       state = testdata1
     } else {
       state = localStorageState
     }
 
     this.state = state
+  }
+
+  reloadStateFromLocalStorage = () => {
+    let localStorageState = JSON.parse(localStorage.getItem('operation-silver-data'))
+    if(localStorageState !== null && localStorageState.data.length !== 0) {
+      this.setState(localStorageState)
+      console.log(`reset state to local storage data`)
+    } else {
+      console.log(`local storage data invalid`)
+    }
   }
 
   updateLocalStorage = () => {
@@ -196,6 +207,8 @@ class App extends Component {
             <h2>todo: single view</h2>
           </Tabs.Panel>
         </Tabs>
+
+        <button id='reload-state-from-local-storage-button' onClick={this.reloadStateFromLocalStorage}></button>
 
       </div>
     )

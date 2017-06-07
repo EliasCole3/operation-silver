@@ -41,6 +41,20 @@ node_modules/.bin/mocha --watch --require ./mocha-config.js ./src/components/*.s
 <pre><code></code></pre>
 
 
+npm i -D chromedriver selenium-standalone wdio-mocha-framework wdio-spec-reporter webdriverio
+
+node_modules/.bin/wdio ./gui-tests/wdio.conf.js
+node_modules/.bin/selenium-standalone install
+node_modules/.bin/selenium-standalone --version
+node_modules/.bin/selenium-standalone start
+
+
+
+
+
+
+
+
 
 
 
