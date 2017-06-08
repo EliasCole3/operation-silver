@@ -12,7 +12,7 @@ class Table extends React.Component {
 
   onMoveRowUpButtonClicked = e => {
     let newState = clone(this.props)
-    let id = +e.target.getAttribute('data-object-id')
+    let id = +e.target.getAttribute('data-entry-id')
     let fromIndex = newState.data.findIndex(x => {
       return x.id === id
     })
@@ -27,7 +27,7 @@ class Table extends React.Component {
   }
   onMoveRowDownButtonClicked = e => {
     let newState = clone(this.props)
-    let id = +e.target.getAttribute('data-object-id')
+    let id = +e.target.getAttribute('data-entry-id')
     let fromIndex = newState.data.findIndex(x => {
       return x.id === id
     })
@@ -43,7 +43,7 @@ class Table extends React.Component {
 
   onDeleteRowButtonClicked = e => {
     let newState = clone(this.props)
-    let id = +e.target.getAttribute('data-object-id')
+    let id = +e.target.getAttribute('data-entry-id')
     let index = newState.data.findIndex(x => {
       return x.id === id
     })
@@ -52,7 +52,7 @@ class Table extends React.Component {
   }
 
   onUpdateRowButtonClicked = e => {
-    let id = +e.target.getAttribute('data-object-id')
+    let id = +e.target.getAttribute('data-entry-id')
     // let index = this.props.data.findIndex(x => {
     //   return x.id === id
     // })
@@ -238,9 +238,9 @@ class Row extends React.Component {
         <input
           type='checkbox'
           className='row-selector-checkbox'
-          data-object-id={this.props.entry.id}
+          data-entry-id={this.props.entry.id}
           onChange={e => {
-            this.props.rowSelectorClicked(+e.target.getAttribute('data-object-id'))
+            this.props.rowSelectorClicked(+e.target.getAttribute('data-entry-id'))
           }}
           checked={checked}
         />
@@ -254,13 +254,16 @@ class Row extends React.Component {
     }
 
     let buttons = [
-      <td key='up'><RowButton classes='button-move-row-up glyphicon glyphicon-arrow-up' objectId={this.props.entry.id} clicked={this.props.onMoveRowUpButtonClicked} /></td>,
-      <td key='down'><RowButton classes='button-move-row-down glyphicon glyphicon-arrow-down' objectId={this.props.entry.id} clicked={this.props.onMoveRowDownButtonClicked} /></td>,
-      <td key='delete'><RowButton classes='button-delete-row glyphicon glyphicon-trash' objectId={this.props.entry.id} clicked={this.props.onDeleteRowButtonClicked} /></td>,
-      <td key='update'><RowButton classes='button-update-row glyphicon glyphicon-edit' objectId={this.props.entry.id} clicked={this.props.onUpdateRowButtonClicked} /></td>
+      <td key='up'><RowButton classes='button-move-row-up glyphicon glyphicon-arrow-up' entryId={this.props.entry.id} clicked={this.props.onMoveRowUpButtonClicked} /></td>,
+      <td key='down'><RowButton classes='button-move-row-down glyphicon glyphicon-arrow-down' entryId={this.props.entry.id} clicked={this.props.onMoveRowDownButtonClicked} /></td>,
+      <td key='delete'><RowButton classes='button-delete-row glyphicon glyphicon-trash' entryId={this.props.entry.id} clicked={this.props.onDeleteRowButtonClicked} /></td>,
+      <td key='update'><RowButton classes='button-update-row glyphicon glyphicon-edit' entryId={this.props.entry.id} clicked={this.props.onUpdateRowButtonClicked} /></td>
     ]
 
-    return <tr>{cells}{buttons}</tr>
+    return <tr 
+      data-entry-id={this.props.entry.id} // hook for gui tests
+      data-entry-company={this.props.entry.company} // hook for gui tests
+    >{cells}{buttons}</tr>
   }
 }
 
@@ -285,7 +288,7 @@ class RowButton extends React.Component {
       <button
         className={classes}
         onClick={this.props.clicked}
-        data-object-id={this.props.objectId}
+        data-entry-id={this.props.entryId}
       ></button>
     )
   }

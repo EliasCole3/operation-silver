@@ -208,6 +208,7 @@ class App extends Component {
           </Tabs.Panel>
         </Tabs>
 
+        {/*for gui tests*/}
         <button id='reload-state-from-local-storage-button' onClick={this.reloadStateFromLocalStorage}></button>
 
       </div>

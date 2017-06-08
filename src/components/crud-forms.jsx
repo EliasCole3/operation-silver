@@ -24,6 +24,7 @@ class CreateEntryForm extends React.Component {
   }
 
   submitForm = e => {
+    console.log(`submitting new entry`)
     let dataToSubmit = clone(this.state.formControls)
 
     // create new entry payload from form control data

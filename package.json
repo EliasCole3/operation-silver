@@ -41,6 +41,7 @@
     "eject": "react-scripts eject",
     "install": "selenium-standalone install",
     "selen": "selenium-standalone start",
-    "gui-tests": "wdio ./gui-tests/wdio.conf.js"
+    "gui-tests": "wdio ./gui-tests/wdio.conf.js",
+    "unit-tests": "node_modules/.bin/mocha --watch --require ./mocha-config.js ./src/components/*.spec.js"
   }
 }
