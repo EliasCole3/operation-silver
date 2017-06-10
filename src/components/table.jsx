@@ -2,6 +2,7 @@ import React from 'react'
 import { arraymove } from '../toolbox/array-methods'
 import { clone } from '../toolbox/clone'
 // import { findPatternInData } from '../toolbox/find-pattern-in-data'
+const moment = require('moment')
 
 class Table extends React.Component {
   // constructor(props) {
@@ -57,6 +58,16 @@ class Table extends React.Component {
     //   return x.id === id
     // })
     this.props.showUpdateForm(id)
+  }
+
+  onSingleViewRowButtonClicked = e => {
+    let id = +e.target.getAttribute('data-entry-id')
+    this.props.showSingleView(id)
+  }
+
+  onEventsRowButtonClicked = e => {
+    let id = +e.target.getAttribute('data-entry-id')
+    this.props.showEventsView(id)
   }
 
   sortColumn = column => {
@@ -143,6 +154,8 @@ class Table extends React.Component {
           onMoveRowDownButtonClicked={this.onMoveRowDownButtonClicked}
           onDeleteRowButtonClicked={this.onDeleteRowButtonClicked}
           onUpdateRowButtonClicked={this.onUpdateRowButtonClicked}
+          onSingleViewRowButtonClicked={this.onSingleViewRowButtonClicked}
+          onEventsRowButtonClicked={this.onEventsRowButtonClicked}
           hiddenTableProperties={this.props.table.hiddenTableProperties}
           table={this.props.table}
           rowSelectorClicked={this.props.rowSelectorClicked}
@@ -249,7 +262,14 @@ class Row extends React.Component {
 
     for(let prop in this.props.entry) {
       if(!this.props.hiddenTableProperties.includes(prop)) {
-        cells.push(<Cell value={this.props.entry[prop]} key={prop} />)
+        if(prop === 'created' || prop === 'updated') {
+          // let value = moment(this.props.entry[prop], 'x').format('MM.DD.YY h:mm:ss a')
+          // let value = moment(this.props.entry[prop], 'x').format('MM.DD.YY')
+          let value = moment(this.props.entry[prop], 'x').format('MM/DD/YY HH:mm:ss')
+          cells.push(<Cell value={value} key={prop} />)
+        } else {
+          cells.push(<Cell value={this.props.entry[prop]} key={prop} />)
+        }
       }
     }
 
@@ -257,7 +277,9 @@ class Row extends React.Component {
       <td key='up'><RowButton classes='button-move-row-up glyphicon glyphicon-arrow-up' entryId={this.props.entry.id} clicked={this.props.onMoveRowUpButtonClicked} /></td>,
       <td key='down'><RowButton classes='button-move-row-down glyphicon glyphicon-arrow-down' entryId={this.props.entry.id} clicked={this.props.onMoveRowDownButtonClicked} /></td>,
       <td key='delete'><RowButton classes='button-delete-row glyphicon glyphicon-trash' entryId={this.props.entry.id} clicked={this.props.onDeleteRowButtonClicked} /></td>,
-      <td key='update'><RowButton classes='button-update-row glyphicon glyphicon-edit' entryId={this.props.entry.id} clicked={this.props.onUpdateRowButtonClicked} /></td>
+      <td key='update'><RowButton classes='button-update-row glyphicon glyphicon-edit' entryId={this.props.entry.id} clicked={this.props.onUpdateRowButtonClicked} /></td>,
+      <td key='single-view'><RowButton classes='button-single-view-row glyphicon glyphicon-eye-open' entryId={this.props.entry.id} clicked={this.props.onSingleViewRowButtonClicked} /></td>,
+      <td key='events'><RowButton classes='button-events-row glyphicon glyphicon-list' entryId={this.props.entry.id} clicked={this.props.onEventsRowButtonClicked} /></td>
     ]
 
     return <tr 

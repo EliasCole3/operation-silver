@@ -2,7 +2,7 @@ import React from 'react'
 import { Input, Textarea } from './form-components'
 import { clone } from '../toolbox/clone'
 import { PropTypes } from 'prop-types'
-
+const moment = require('moment')
 
 class CreateEntryForm extends React.Component {
   constructor(props) {
@@ -35,7 +35,9 @@ class CreateEntryForm extends React.Component {
       description: dataToSubmit.description,
       jobTitle: dataToSubmit.jobTitle,
       notes: dataToSubmit.notes,
-      sortOrder: newId
+      sortOrder: newId,
+      created: moment().format('x'),
+      updated: moment().format('x')
     }
 
     this.props.addNewEntryToData(newEntry)
@@ -102,7 +104,9 @@ class UpdateEntryForm extends React.Component {
       company: dataToSubmit.company,
       description: dataToSubmit.description,
       jobTitle: dataToSubmit.jobTitle,
-      notes: dataToSubmit.notes
+      notes: dataToSubmit.notes,
+      created: this.props.entryToUpdate.created,
+      updated: moment().format('x')
     }
 
     this.props.updateEntry(entry)

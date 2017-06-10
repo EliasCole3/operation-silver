@@ -40,6 +40,7 @@ class App extends Component {
     if(localStorageState === null || localStorageState.data.length === 0) {
       console.log(`failed to retrieve data from local storage, loading data from test file`)
       state = testdata1
+      localStorage.setItem('operation-silver-last-id', '3')
     } else {
       state = localStorageState
     }
@@ -103,12 +104,38 @@ class App extends Component {
     }, this.updateLocalStorage)
   }
 
+  showSingleView = id => {
+    let entryToShow = this.state.data.filter(x => {
+      return x.id === id
+    })[0]
+    console.log('called')
+    this.setState({
+      activeTab: 3,
+      singleViewEntry: entryToShow
+    }, this.updateLocalStorage)
+  }
+
+  showEventsView = id => {
+    let entry = this.state.data.filter(x => {
+      return x.id === id
+    })[0]
+    console.log(entry)
+    this.setState({
+      modalOpen: true,
+      entryWithEventsToUpdate: entry
+    }, this.updateLocalStorage)
+  }
+
   showModal = () => {
     this.setState({ modalOpen: true }, this.updateLocalStorage)
   }
 
   closeModal = () => {
-    this.setState({ modalOpen: false }, this.updateLocalStorage)
+    this.setState({ 
+      modalOpen: false,
+      entryToUpdate: null,
+      entryWithEventsToUpdate: null
+    }, this.updateLocalStorage)
   }
 
   rowSelectorClicked = entryId => {
@@ -130,13 +157,65 @@ class App extends Component {
     return newId
   }
 
+  getModalBody = () => {
+    if(this.state.entryToUpdate) {
+      return (<UpdateEntryForm
+        entryToUpdate={this.state.entryToUpdate}
+        updateEntry={this.updateEntry}
+        afterUpdate={() => {
+          this.closeModal()
+        }}
+      />)
+    }
+    if(this.state.eventsToUpdate) {
+      return (
+        JSON.stringify(this.state.eventsToUpdate, null, 2)
+      )
+    }
+  }
+
+  getModalTitle = () => {
+    return 
+  }
+
+  getModalInfo = () => {
+    let obj = {}
+    obj.title = ''
+    obj.body = ''
+    obj.footer = ''
+
+    if(this.state.entryToUpdate) {
+      obj.title = `Updating Entry ${this.state.entryToUpdate.id}`
+      obj.body = (<UpdateEntryForm
+        entryToUpdate={this.state.entryToUpdate}
+        updateEntry={this.updateEntry}
+        afterUpdate={() => {
+          this.closeModal()
+        }}
+      />)
+    }
+    if(this.state.entryWithEventsToUpdate) {
+      obj.title = `Updating events for entry ${this.state.entryWithEventsToUpdate.id}`
+      obj.body = JSON.stringify(this.state.entryWithEventsToUpdate.events, null, 2)
+    }
+
+    return obj
+  }
+
+  afterTabChange = index => {
+    this.setState({ activeTab: index }, this.updateLocalStorage)
+  }
+
   render() {
     return (
       <div className='App'>
 
 
 
-        <Tabs>
+        <Tabs 
+          tabActive={this.state.activeTab}
+          onAfterChange={this.afterTabChange}
+        >
 
           <Tabs.Panel title='Table'>
 
@@ -145,6 +224,8 @@ class App extends Component {
               deleteEntry={this.deleteEntry}
               updateEntry={this.updateEntry}
               showUpdateForm={this.showUpdateForm}
+              showSingleView={this.showSingleView}
+              showEventsView={this.showEventsView}
               updateGlobalState={this.updateGlobalState}
               table={this.state.table}
               rowSelectorClicked={this.rowSelectorClicked}
@@ -175,20 +256,7 @@ class App extends Component {
             >Load</button>
 
 
-            <Modal 
-              show={this.state.modalOpen}
-              close={this.closeModal}
-              title={`Updating Entry ${this.state.entryToUpdate === null ? '' : this.state.entryToUpdate.id}`}
-              body={
-                <UpdateEntryForm
-                  entryToUpdate={this.state.entryToUpdate}
-                  updateEntry={this.updateEntry}
-                  afterUpdate={() => {
-                    this.closeModal()
-                  }}
-                />
-              }
-            />
+            
             
 
           </Tabs.Panel>
@@ -204,12 +272,24 @@ class App extends Component {
           </Tabs.Panel>
 
           <Tabs.Panel title='Single'>
-            <h2>todo: single view</h2>
+            <div id='single-view-wrapper'>
+              <pre>
+                {JSON.stringify(this.state.singleViewEntry, null, 2)}
+              </pre>
+            </div>
           </Tabs.Panel>
         </Tabs>
 
         {/*for gui tests*/}
         <button id='reload-state-from-local-storage-button' onClick={this.reloadStateFromLocalStorage}></button>
+
+        <Modal
+          show={this.state.modalOpen}
+          close={this.closeModal}
+          title={this.getModalInfo().title}
+          body={this.getModalInfo().body}
+          footer={this.getModalInfo().footer}
+        />
 
       </div>
     )

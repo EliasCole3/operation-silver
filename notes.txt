@@ -7,12 +7,37 @@ propTypes for components
 
 Next features
 ---------------------
+figure out how to use the Table component with an entry's events
 gui tests for current features
 single view
 Events
 pagination
 molly guard delete
 features using row selection
+settings
+ - after create new entry
+  - switch to table view
+  - switch to single view
+
+
+
+
+
+$$('.tabs-menu-item')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
