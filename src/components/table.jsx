@@ -1,15 +1,31 @@
 import React from 'react'
 import { arraymove } from '../toolbox/array-methods'
 import { clone } from '../toolbox/clone'
-// import { findPatternInData } from '../toolbox/find-pattern-in-data'
 const moment = require('moment')
+import { Modal } from './bs-modal-wrapper'
+import Form from 'react-jsonschema-form'
+import {dataTypeOf} from './../toolbox/data-type-of'
+// import { findPatternInData } from '../toolbox/find-pattern-in-data'
 
 class Table extends React.Component {
-  // constructor(props) {
-  //   // calls the parent constructor
-  //   // if not included: Syntax error: 'this' is not allowed before super()
-  //   super(props)
-  // }
+
+  constructor(props) {
+    super(props)
+    this.state = {}
+
+    // if columnOrder isn't included in the Table config
+    if(!this.props.columnOrder) {
+      let columnOrder = []
+      columnOrder.push('id')
+      for(let prop in this.props.data[0]) {
+        if(prop !== 'id') {
+          columnOrder.push(prop)
+        }
+      }
+      columnOrder.sort()
+      this.state.columnOrder = columnOrder
+    }
+  }
 
   onMoveRowUpButtonClicked = e => {
     let data = clone(this.props.data)
@@ -24,8 +40,9 @@ class Table extends React.Component {
       x.sortOrder = i
     })
 
-    this.props.updateData(data)
+    this.props.updateTableSettingsOrData({ data: data })
   }
+
   onMoveRowDownButtonClicked = e => {
     let data = clone(this.props.data)
     let id = +e.target.getAttribute('data-entry-id')
@@ -39,22 +56,25 @@ class Table extends React.Component {
       x.sortOrder = i
     })
 
-    this.props.updateData(data)
+    this.props.updateTableSettingsOrData({ data: data })
   }
 
   onDeleteRowButtonClicked = e => {
-    let newState = clone(this.props)
+    let data = clone(this.props.data)
     let id = +e.target.getAttribute('data-entry-id')
-    let index = newState.data.findIndex(x => {
+    let index = data.findIndex(x => {
       return x.id === id
     })
-
-    this.props.deleteEntry(index)
+    data.splice(index, 1)
+    this.props.updateTableSettingsOrData({ data: data })
   }
 
   onUpdateRowButtonClicked = e => {
-    let id = +e.target.getAttribute('data-entry-id')
-    this.props.showUpdateForm(id)
+    // let id = +e.target.getAttribute('data-entry-id')
+    // this.props.showUpdateForm(id)
+    let tableSettings = clone(this.props.tableSettings)
+    tableSettings.modalOpen = true
+    this.props.updateTableSettingsOrData({ settings: tableSettings })
   }
 
   onSingleViewRowButtonClicked = e => {
@@ -91,7 +111,98 @@ class Table extends React.Component {
 
     newSettings.currentSortColumn = column
 
-    this.props.updateTableSettingsAndData(newSettings, data)
+    this.props.updateTableSettingsOrData({ settings: newSettings, data: data })
+  }
+
+  createNewFullObject = params => {
+    let newEntry = {
+      id: params.id,
+      sortOrder: params.id,
+      created: moment().format('x'),
+      updated: moment().format('x')
+    }
+
+    for(let prop in params.formData) {
+      // todo: make this optional?
+      if(dataTypeOf(params.formData[prop]) === 'array') {
+        let values = []
+        console.log(dataTypeOf(params.formData[prop]))
+        console.log(params.formData[prop])
+        params.formData[prop].forEach((x, i)=> {
+          values.push(this.createNewFullObject({id: i+1, formData: x}))
+        })
+        newEntry[prop] = values
+      } else {
+        newEntry[prop] = params.formData[prop]
+      }
+    }
+
+    return newEntry
+  }
+
+  addEntry = formData => {
+    let data = clone(this.props.data)
+
+    let newId = data.sort((x, y) => {
+      // sort descending
+      if(x.id > y.id) return -1
+      if(x.id < y.id) return 1
+      return 0
+    })[0].id + 1
+
+    // let newId = this.props.getNewId()
+
+    // let newEntry = {
+    //   id: newId,
+    //   sortOrder: newId,
+    //   created: moment().format('x'),
+    //   updated: moment().format('x')
+    // }
+
+    // for(let prop in formData) {
+    //   newEntry[prop] = formData[prop]
+    // }
+
+    let newEntry = this.createNewFullObject({id: newId, formData: formData})
+
+    console.log(newEntry)
+
+    data.push(newEntry)
+
+    this.props.updateTableSettingsOrData({ data: data })
+  }
+
+  getModalInfo = () => {
+    let obj = {}
+    obj.title = ''
+    obj.body = ''
+    obj.footer = ''
+
+    if(this.props.tableSettings.modalSetting === 'create') {
+      obj.title = <b>Creating New Entry</b>
+      obj.body = <Form
+        schema={this.props.modelSchema}
+        uiSchema={this.props.uiSchema}
+        onChange={() => {
+          console.log('changed')
+        }}
+        onSubmit={e => {
+          this.addEntry(e.formData)
+          console.log(e.formData)
+          console.log('submitted')
+        }}
+        onError={errors => {
+          console.log('errors')
+          console.log(errors)
+        }}
+      />
+    }
+    if(this.props.tableSettings.modalSetting === 'update') {
+      obj.title = `Updating events for entry asdf`
+      obj.body = 'form'
+    }
+
+    return obj
   }
 
   buildTable() {
@@ -120,26 +231,24 @@ class Table extends React.Component {
       columnHeaders.push(<th key='row-selector'></th>)
     }
 
-    // get column headers from the first object's properties
-    for(let prop in data[0]) {
-      if(!this.props.tableSettings.hiddenTableProperties.includes(prop)) {
-        let className = this.props.tableSettings.currentSortColumn === prop ? 'column-header-sorted' : 'column-header'
-        columnHeaders.push(
-          <th
-            className={className}
-            key={prop}
-            name={prop}
-            onClick={e => {
-              if(this.props.enabledFeatures && this.props.enabledFeatures.includes('column sorting')) {
-                this.sortColumn(e.target.getAttribute('name'))
-              }
-            }}
-          >
-            {prop}
-          </th>
-        )
-      }
-    }
+    let columnOrder = this.props.columnOrder ? this.props.columnOrder : this.state.columnOrder
+    columnOrder.forEach(x => {
+      let className = this.props.tableSettings.currentSortColumn === x ? 'column-header-sorted' : 'column-header'
+      columnHeaders.push(
+        <th
+          className={className}
+          key={x}
+          name={x}
+          onClick={e => {
+            if(this.props.enabledFeatures && this.props.enabledFeatures.includes('column sorting')) {
+              this.sortColumn(e.target.getAttribute('name'))
+            }
+          }}
+        >
+          {x}
+        </th>
+      )
+    })
 
     let thead = (
       <thead>
@@ -160,11 +269,12 @@ class Table extends React.Component {
           onUpdateRowButtonClicked={this.onUpdateRowButtonClicked}
           onSingleViewRowButtonClicked={this.onSingleViewRowButtonClicked}
           onEventsRowButtonClicked={this.onEventsRowButtonClicked}
-          hiddenTableProperties={this.props.tableSettings.hiddenTableProperties}
           tableSettings={this.props.tableSettings}
           rowSelectorClicked={this.props.rowSelectorClicked}
           customRowButtons={this.props.customRowButtons}
           enabledFeatures={this.props.enabledFeatures}
+          updateTableSettingsOrData={this.props.updateTableSettingsOrData}
+          columnOrder={this.props.columnOrder ? this.props.columnOrder : this.state.columnOrder}
         />
       )
     })
@@ -175,13 +285,28 @@ class Table extends React.Component {
 
     let fullTable = (
       <div id='table-wrapper'>
+
         <ControlBar
           data={this.props.data}
           tableSettings={this.props.tableSettings}
-          updateTableSettings={this.props.updateTableSettings}
+          updateTableSettingsOrData={this.props.updateTableSettingsOrData}
           enabledFeatures={this.props.enabledFeatures}
         />
+
         {table}
+
+        <Modal
+          show={this.props.tableSettings.modalOpen}
+          close={() => {
+            let tableSettings = clone(this.props.tableSettings)
+            tableSettings.modalOpen = false
+            this.props.updateTableSettingsOrData({ settings: tableSettings })
+          }}
+          title={this.getModalInfo().title}
+          body={this.getModalInfo().body}
+          footer={this.getModalInfo().footer}
+        />
+
       </div>
     )
 
@@ -200,12 +325,25 @@ class ControlBar extends React.Component {
   build = () => {
     let elements = []
 
+    if(this.props.enabledFeatures && this.props.enabledFeatures.includes('create')) {
+      elements.push(<button
+        key='create'
+        className='btn btn-md glyphicon glyphicon-plus create-button'
+        onClick={() => {
+          let tableSettings = clone(this.props.tableSettings)
+          tableSettings.modalOpen = true
+          tableSettings.modalSetting = 'create'
+          this.props.updateTableSettingsOrData({ settings: tableSettings })
+        }}
+      />)
+    }
+
     if(this.props.enabledFeatures && this.props.enabledFeatures.includes('search')) {
       elements.push(<SearchBox
         key='searchbox'
         data={this.props.data}
         tableSettings={this.props.tableSettings}
-        updateTableSettings={this.props.updateTableSettings}
+        updateTableSettingsOrData={this.props.updateTableSettingsOrData}
       />)
     }
 
@@ -225,7 +363,7 @@ class SearchBox extends React.Component {
   search = searchString => {
     let tableSettings = clone(this.props.tableSettings)
     tableSettings.searchString = searchString
-    this.props.updateTableSettings(tableSettings)
+    this.props.updateTableSettingsOrData({ settings: tableSettings })
   }
 
   render() {
@@ -266,22 +404,20 @@ class Row extends React.Component {
       )
     }
 
-    for(let prop in this.props.entry) {
-      if(!this.props.hiddenTableProperties.includes(prop)) {
-        if(prop === 'created' || prop === 'updated') {
-          // let value = moment(this.props.entry[prop], 'x').format('MM.DD.YY h:mm:ss a')
-          // let value = moment(this.props.entry[prop], 'x').format('MM.DD.YY')
-          let value = moment(this.props.entry[prop], 'x').format('MM/DD/YY HH:mm:ss')
-          cells.push(<Cell value={value} key={prop} />)
-        } else {
-          cells.push(<Cell value={this.props.entry[prop]} key={prop} />)
-        }
+    this.props.columnOrder.forEach(x => {
+      if(x === 'created' || x === 'updated') {
+        // let value = moment(this.props.entry[prop], 'x').format('MM.DD.YY h:mm:ss a')
+        // let value = moment(this.props.entry[prop], 'x').format('MM.DD.YY')
+        let value = moment(this.props.entry[x], 'x').format('MM/DD/YY HH:mm:ss')
+        cells.push(<Cell value={value} key={x} />)
+      } else {
+        cells.push(<Cell value={this.props.entry[x]} key={x} />)
       }
-    }
-    
-    let buttons = []
+    })
 
-    
+
+
+    let buttons = []
 
     if(this.props.enabledFeatures && this.props.enabledFeatures.includes('delete')) {
       buttons.push(<td key='delete'><RowButton classes='button-delete-row glyphicon glyphicon-trash' entryId={this.props.entry.id} clicked={this.props.onDeleteRowButtonClicked} /></td>)
@@ -290,7 +426,7 @@ class Row extends React.Component {
     if(this.props.enabledFeatures && this.props.enabledFeatures.includes('update')) {
       buttons.push(<td key='update'><RowButton classes='button-update-row glyphicon glyphicon-edit' entryId={this.props.entry.id} clicked={this.props.onUpdateRowButtonClicked} /></td>)
     }
-    
+
     if(this.props.enabledFeatures && this.props.enabledFeatures.includes('view')) {
       buttons.push(<td key='single-view'><RowButton classes='button-single-view-row glyphicon glyphicon-eye-open' entryId={this.props.entry.id} clicked={this.props.onSingleViewRowButtonClicked} /></td>)
     }
@@ -318,10 +454,14 @@ class Row extends React.Component {
       })
     }
 
-    return <tr
-      data-entry-id={this.props.entry.id} // hook for gui tests
-      data-entry-company={this.props.entry.company} // hook for gui tests
-    >{cells}{buttons}</tr>
+    return (
+      <tr
+        data-entry-id={this.props.entry.id} // hook for gui tests
+        data-entry-company={this.props.entry.company} // hook for gui tests
+      >
+        {cells}{buttons}
+      </tr>
+    )
   }
 }
 

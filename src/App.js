@@ -5,23 +5,24 @@ import './styles/App.css'
 import './styles/react-simpletabs.css'
 // import logo from './logo.svg'
 
-// external libraries
-// import Tabs from 'react-simpletabs'
+// External Libraries
 import Tabs from './scripts/react-simpletabs'
 const moment = require('moment')
+import Form from 'react-jsonschema-form'
+// import Tabs from 'react-simpletabs'
 // import * as bs from 'react-bootstrap'
 
-// internal dependencies
+// Internal Dependencies
 import { Table } from './components/table.jsx'
 import { CreateEntryForm, UpdateEntryForm } from './components/crud-forms'
 import { Modal } from './components/bs-modal-wrapper'
-// import * as main from './main.js'
-// import { Class1 } from './components/test-components'
 import { clone } from './toolbox/clone'
 import { savefile } from './toolbox/savefile'
 import { loadfile } from './toolbox/loadfile'
+// import * as main from './main.js'
+// import { Class1 } from './components/test-components'
 
-// data
+// Data
 import { data as testdata1 } from './sample-data/data1.js'
 
 
@@ -65,7 +66,7 @@ class App extends Component {
     localStorage.setItem('operation-silver-data', JSON.stringify(this.state))
   }
 
-  updateGlobalState = (newState, callback=null) => {
+  updateGlobalState = (newState, callback = null) => {
     // this.setState(newState, this.updateLocalStorage)
     this.setState(newState, () => {
       this.updateLocalStorage()
@@ -76,12 +77,6 @@ class App extends Component {
   addNewEntryToData = newEntry => {
     let newState = clone(this.state)
     newState.data.push(newEntry)
-    this.setState(newState, this.updateLocalStorage)
-  }
-
-  deleteEntry = index => {
-    let newState = clone(this.state)
-    newState.data.splice(index, 1)
     this.setState(newState, this.updateLocalStorage)
   }
 
@@ -133,7 +128,7 @@ class App extends Component {
   }
 
   closeModal = () => {
-    this.setState({ 
+    this.setState({
       modalOpen: false,
       entryToUpdate: null,
       entryWithEventsToUpdate: null
@@ -196,6 +191,7 @@ class App extends Component {
             'row transiency',
             'column sorting',
             'search',
+            'create',
             'delete',
             'update',
             'view'
@@ -208,29 +204,75 @@ class App extends Component {
             }
           ]}
           data={this.state.data}
-          updateData={data => {
-            let state = clone(this.state)
-            state.data = data
-            this.setState(state)
-          }}
           tableSettings={this.state.tableSettings.entries}
-          updateTableSettings={newSettings => {
+          updateTableSettingsOrData={params => {
             let state = clone(this.state)
-            state.tableSettings.entries = newSettings
-            this.setState(state)
+
+            if(params.data) {
+              state.data = params.data
+            }
+
+            if(params.settings) {
+              state.tableSettings.entries = params.settings
+            }
+
+            this.setState(state, this.updateLocalStorage)
           }}
-          updateTableSettingsAndData={(settings, data) => {
-            let state = clone(this.state)
-            state.data = data
-            state.tableSettings.entries = settings
-            this.setState(state)
-          }}
-          deleteEntry={this.deleteEntry}
           updateEntry={this.updateEntry}
           showUpdateForm={this.showUpdateForm}
           showSingleView={this.showSingleView}
           showEventsView={this.showEventsView}
           rowSelectorClicked={this.rowSelectorClicked}
+          modelSchema={{
+            title: 'Entry',
+            type: 'object',
+            required: ['company', 'jobTitle'],
+            properties: {
+              company: { type: 'string', title: 'Company' },
+              description: { type: 'string', title: 'Description' },
+              jobTitle: { type: 'string', title: 'Job Title' },
+              notes: { type: 'string', title: 'Notes' },
+              events: { type: 'array', title: 'Events', items: {
+                type: 'object', properties: {
+                  value: { type: 'string'}
+                }
+              }}
+            }
+          }}
+          uiSchema={{
+            'ui:rootFieldId': 'entry',
+            'ui:order': [
+              'company',
+              'description',
+              'jobTitle',
+              'notes',
+              'events'
+            ],
+            company: {
+              'ui:autofocus': true
+            },
+            description: {
+              // 'ui:help': 'should be short',
+              'ui:placeholder': 'should be short'
+            },
+            jobTitle: {},
+            notes: {
+              'ui:widget': 'textarea',
+              'ui:options': {
+                rows: 7
+              }
+            }
+          }}
+          columnOrder={[
+            'id',
+            'company',
+            'description',
+            'jobTitle',
+            'notes',
+            'created',
+            'updated'
+          ]}
+
         />
       )
     } else {
@@ -252,42 +294,29 @@ class App extends Component {
               'column sorting',
               'search',
               'delete',
-              'update',
-              'view'
+              'update'
             ]}
             data={this.state.entryWithEventsToUpdate.events}
-            updateData={data => {
-              let state = clone(this.state)
-              let index = state.data.findIndex(x => {
-                return x.id === this.state.entryWithEventsToUpdate.id
-              })
-              state.data[index].events = data
-              state.entryWithEventsToUpdate = state.data[index]
-              this.setState(state)
-            }}
             tableSettings={this.state.tableSettings.events}
-            updateTableSettings={newSettings => {
-              let state = clone(this.state)
-              state.tableSettings.events = newSettings
-              this.setState(state)
-            }}
-            updateTableSettingsAndData={(settings, data) => {
+            updateTableSettingsOrData={params => {
               let state = clone(this.state)
 
-              let index = state.data.findIndex(x => {
-                return x.id === this.state.entryWithEventsToUpdate.id
-              })
-              state.data[index].events = data
-              state.entryWithEventsToUpdate = state.data[index]
+              if(params.data) {
+                let index = state.data.findIndex(x => {
+                  return x.id === this.state.entryWithEventsToUpdate.id
+                })
+                state.data[index].events = params.data
+                state.entryWithEventsToUpdate = state.data[index]
+              }
 
-              state.tableSettings.events = settings
-              this.setState(state)
+              if(params.settings) {
+                state.tableSettings.events = params.settings
+              }
+
+              this.setState(state, this.updateLocalStorage)
             }}
-            deleteEntry={this.deleteEntry}
             updateEntry={this.updateEntry}
             showUpdateForm={this.showUpdateForm}
-            showSingleView={this.showSingleView}
-            showEventsView={this.showEventsView}
             rowSelectorClicked={this.rowSelectorClicked}
           />
         </div>
@@ -300,7 +329,7 @@ class App extends Component {
   }
 
   getSaveButton = () => {
-    return(
+    return (
       <button
         id='savefile'
         className='btn btn-lg'
@@ -313,7 +342,7 @@ class App extends Component {
   }
 
   getLoadButton = () => {
-    return(
+    return (
       <button
         id='loadfile'
         className='btn btn-lg'
@@ -328,7 +357,7 @@ class App extends Component {
   }
 
   getStateBox = () => {
-    return(
+    return (
       <div id='state-box-wrapper'>
         <textarea id='state-box' value={JSON.stringify(this.state, '', 2)} onChange={e => { }}></textarea>
       </div>
@@ -340,7 +369,7 @@ class App extends Component {
     return (
       <div className='App'>
 
-        <Tabs 
+        <Tabs
           tabActive={this.state.activeTab}
           onAfterChange={this.afterTabChange}
         >
@@ -369,7 +398,7 @@ class App extends Component {
 
           <Tabs.Panel title='Events'>
             <div id='events-table-wrapper'>
-              {this.getEventsTable()}
+              {/*{this.getEventsTable()}*/}
             </div>
           </Tabs.Panel>
 
@@ -380,13 +409,13 @@ class App extends Component {
         {/*for gui tests*/}
         <button id='reload-state-from-local-storage-button' onClick={this.reloadStateFromLocalStorage}></button>
 
-        <Modal
+        {/*<Modal
           show={this.state.modalOpen}
           close={this.closeModal}
           title={this.getModalInfo().title}
           body={this.getModalInfo().body}
           footer={this.getModalInfo().footer}
-        />
+        />*/}
 
       </div>
     )

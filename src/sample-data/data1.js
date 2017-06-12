@@ -83,19 +83,16 @@ let data = {
       currentSortDirection: 'ascending',
       selectedEntryIds: [2],
       searchString: '',
-      hiddenTableProperties: [
-        'sortOrder',
-        'events'
-      ]
+      modalOpen: false,
+      modalSetting: null
     },
     events: {
       currentSortColumn: null,
       currentSortDirection: 'ascending',
       selectedEntryIds: [],
       searchString: '',
-      hiddenTableProperties: [
-        'sortOrder'
-      ]
+      modalOpen: false,
+      modalSetting: null
     }
   },
   activeTab: 1
