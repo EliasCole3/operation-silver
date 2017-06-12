@@ -42,6 +42,7 @@ class App extends Component {
       console.log(`failed to retrieve data from local storage, loading data from test file`)
       state = testdata1
       localStorage.setItem('operation-silver-last-id', '3')
+      localStorage.setItem('operation-silver-data', JSON.stringify(state))
     } else {
       state = localStorageState
     }
@@ -122,7 +123,7 @@ class App extends Component {
     })[0]
     console.log(entry)
     this.setState({
-      modalOpen: true,
+      activeTab: 4,
       entryWithEventsToUpdate: entry
     }, this.updateLocalStorage)
   }
@@ -186,11 +187,158 @@ class App extends Component {
     this.setState({ activeTab: index }, this.updateLocalStorage)
   }
 
+  getEntriesTable = () => {
+    if(this.state.data.length !== 0) {
+      return (
+        <Table
+          enabledFeatures={[
+            'row selectors',
+            'row transiency',
+            'column sorting',
+            'search',
+            'delete',
+            'update',
+            'view'
+          ]}
+          customRowButtons={[
+            {
+              key: 'events',
+              glyphicon: 'list',
+              handler: this.showEventsView
+            }
+          ]}
+          data={this.state.data}
+          updateData={data => {
+            let state = clone(this.state)
+            state.data = data
+            this.setState(state)
+          }}
+          tableSettings={this.state.tableSettings.entries}
+          updateTableSettings={newSettings => {
+            let state = clone(this.state)
+            state.tableSettings.entries = newSettings
+            this.setState(state)
+          }}
+          updateTableSettingsAndData={(settings, data) => {
+            let state = clone(this.state)
+            state.data = data
+            state.tableSettings.entries = settings
+            this.setState(state)
+          }}
+          deleteEntry={this.deleteEntry}
+          updateEntry={this.updateEntry}
+          showUpdateForm={this.showUpdateForm}
+          showSingleView={this.showSingleView}
+          showEventsView={this.showEventsView}
+          rowSelectorClicked={this.rowSelectorClicked}
+        />
+      )
+    } else {
+      return (
+        <h2>There is no data currently. Please head to 'New' to create an entry :)</h2>
+      )
+    }
+  }
+
+  getEventsTable = () => {
+    if(this.state.entryWithEventsToUpdate) {
+      return (
+        <div id=''>
+          <h2>Events view for {this.state.entryWithEventsToUpdate.company}</h2>
+          <Table
+            enabledFeatures={[
+              'row selectors',
+              'row transiency',
+              'column sorting',
+              'search',
+              'delete',
+              'update',
+              'view'
+            ]}
+            data={this.state.entryWithEventsToUpdate.events}
+            updateData={data => {
+              let state = clone(this.state)
+              let index = state.data.findIndex(x => {
+                return x.id === this.state.entryWithEventsToUpdate.id
+              })
+              state.data[index].events = data
+              state.entryWithEventsToUpdate = state.data[index]
+              this.setState(state)
+            }}
+            tableSettings={this.state.tableSettings.events}
+            updateTableSettings={newSettings => {
+              let state = clone(this.state)
+              state.tableSettings.events = newSettings
+              this.setState(state)
+            }}
+            updateTableSettingsAndData={(settings, data) => {
+              let state = clone(this.state)
+
+              let index = state.data.findIndex(x => {
+                return x.id === this.state.entryWithEventsToUpdate.id
+              })
+              state.data[index].events = data
+              state.entryWithEventsToUpdate = state.data[index]
+
+              state.tableSettings.events = settings
+              this.setState(state)
+            }}
+            deleteEntry={this.deleteEntry}
+            updateEntry={this.updateEntry}
+            showUpdateForm={this.showUpdateForm}
+            showSingleView={this.showSingleView}
+            showEventsView={this.showEventsView}
+            rowSelectorClicked={this.rowSelectorClicked}
+          />
+        </div>
+      )
+    } else {
+      return (
+        <div id=''>Nothing to see here. Move along.</div>
+      )
+    }
+  }
+
+  getSaveButton = () => {
+    return(
+      <button
+        id='savefile'
+        className='btn btn-lg'
+        onClick={e => {
+          let filename = `silver-state_${moment().format('MM_DD_YY_hh_mm_ss')}.json`
+          savefile(JSON.stringify(this.state, '', 2), filename)
+        }}
+      >Save</button>
+    )
+  }
+
+  getLoadButton = () => {
+    return(
+      <button
+        id='loadfile'
+        className='btn btn-lg'
+        onClick={e => {
+          loadfile(data => {
+            let newState = JSON.parse(data)
+            this.setState(newState, this.updateLocalStorage)
+          })
+        }}
+      >Load</button>
+    )
+  }
+
+  getStateBox = () => {
+    return(
+      <div id='state-box-wrapper'>
+        <textarea id='state-box' value={JSON.stringify(this.state, '', 2)} onChange={e => { }}></textarea>
+      </div>
+    )
+  }
+
+
   render() {
     return (
       <div className='App'>
-
-
 
         <Tabs 
           tabActive={this.state.activeTab}
@@ -198,51 +346,11 @@ class App extends Component {
         >
 
           <Tabs.Panel title='Table'>
-
-            <Table 
-              data={this.state.data}
-              deleteEntry={this.deleteEntry}
-              updateEntry={this.updateEntry}
-              showUpdateForm={this.showUpdateForm}
-              showSingleView={this.showSingleView}
-              showEventsView={this.showEventsView}
-              updateGlobalState={this.updateGlobalState}
-              table={this.state.table}
-              rowSelectorClicked={this.rowSelectorClicked}
-            />
-
-            <div id='state-box-wrapper'>
-              <textarea id='state-box' value={JSON.stringify(this.state, '', 2)} onChange={e => { }}></textarea>
-            </div>
-
-            <button
-              id='savefile'
-              className='btn btn-lg'
-              onClick={e => {
-                let filename = `silver-state_${moment().format('MM_DD_YY_hh_mm_ss')}.json`
-                savefile(JSON.stringify(this.state, '', 2), filename)
-              }}
-            >Save</button>
-
-            <button
-              id='loadfile'
-              className='btn btn-lg'
-              onClick={e => {
-                loadfile(data => {
-                  let newState = JSON.parse(data)
-                  this.setState(newState, this.updateLocalStorage)
-                })
-              }}
-            >Load</button>
-
-
-            
-            
-
+            {this.getEntriesTable()}
+            {this.getStateBox()}
+            {this.getSaveButton()}
+            {this.getLoadButton()}
           </Tabs.Panel>
-
-
-
 
           <Tabs.Panel title='New'>
             <CreateEntryForm
@@ -258,7 +366,16 @@ class App extends Component {
               </pre>
             </div>
           </Tabs.Panel>
+
+          <Tabs.Panel title='Events'>
+            <div id='events-table-wrapper'>
+              {this.getEventsTable()}
+            </div>
+          </Tabs.Panel>
+
         </Tabs>
+
+
 
         {/*for gui tests*/}
         <button id='reload-state-from-local-storage-button' onClick={this.reloadStateFromLocalStorage}></button>
@@ -275,6 +392,8 @@ class App extends Component {
     )
   }
 }
+
+
 
 export default App
 

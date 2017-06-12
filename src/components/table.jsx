@@ -12,34 +12,34 @@ class Table extends React.Component {
   // }
 
   onMoveRowUpButtonClicked = e => {
-    let newState = clone(this.props)
+    let data = clone(this.props.data)
     let id = +e.target.getAttribute('data-entry-id')
-    let fromIndex = newState.data.findIndex(x => {
+    let fromIndex = data.findIndex(x => {
       return x.id === id
     })
-    newState.data = arraymove(newState.data, fromIndex, fromIndex - 1)
+    data = arraymove(data, fromIndex, fromIndex - 1)
 
     // set the sortOrder to the array index
-    newState.data.forEach((x, i) => {
+    data.forEach((x, i) => {
       x.sortOrder = i
     })
 
-    this.props.updateGlobalState(newState)
+    this.props.updateData(data)
   }
   onMoveRowDownButtonClicked = e => {
-    let newState = clone(this.props)
+    let data = clone(this.props.data)
     let id = +e.target.getAttribute('data-entry-id')
-    let fromIndex = newState.data.findIndex(x => {
+    let fromIndex = data.findIndex(x => {
       return x.id === id
     })
-    newState.data = arraymove(newState.data, fromIndex, fromIndex + 1)
+    data = arraymove(data, fromIndex, fromIndex + 1)
 
     // set the sortOrder to the array index
-    newState.data.forEach((x, i) => {
+    data.forEach((x, i) => {
       x.sortOrder = i
     })
 
-    this.props.updateGlobalState(newState)
+    this.props.updateData(data)
   }
 
   onDeleteRowButtonClicked = e => {
@@ -54,9 +54,6 @@ class Table extends React.Component {
 
   onUpdateRowButtonClicked = e => {
     let id = +e.target.getAttribute('data-entry-id')
-    // let index = this.props.data.findIndex(x => {
-    //   return x.id === id
-    // })
     this.props.showUpdateForm(id)
   }
 
@@ -71,39 +68,42 @@ class Table extends React.Component {
   }
 
   sortColumn = column => {
-    let newState = clone(this.props)
+    let newSettings = clone(this.props.tableSettings)
+    let data = clone(this.props.data)
 
-    if(this.props.table.currentSortColumn === column && this.props.table.currentSortDirection === 'descending') {
-      newState.data.sort((x, y) => {
+    if(this.props.tableSettings.currentSortColumn === column && this.props.tableSettings.currentSortDirection === 'descending') {
+      data.sort((x, y) => {
         // sort ascending
         if(x[column] > y[column]) return 1
         if(x[column] < y[column]) return -1
         return 0
       })
-      newState.table.currentSortDirection = 'ascending'
+      newSettings.currentSortDirection = 'ascending'
     } else {
-      newState.data.sort((x, y) => {
+      data.sort((x, y) => {
         // sort descending
         if(x[column] > y[column]) return -1
         if(x[column] < y[column]) return 1
         return 0
       })
-      newState.table.currentSortDirection = 'descending'
+      newSettings.currentSortDirection = 'descending'
     }
 
-    newState.table.currentSortColumn = column
+    newSettings.currentSortColumn = column
 
-    this.props.updateGlobalState(newState)
+    this.props.updateTableSettingsAndData(newSettings, data)
   }
 
   buildTable() {
     let data = clone(this.props.data)
 
-    // filter the table data down based on the search string
-    if(this.props.table.searchString !== '') {
-      console.log(`current search string: '${this.props.table.searchString}'`)
+    // console.log(this.props.tableSettings)
 
-      let regex = new RegExp(this.props.table.searchString, 'i')
+    // filter the table data down based on the search string
+    if(this.props.tableSettings.searchString !== '') {
+      console.log(`current search string: '${this.props.tableSettings.searchString}'`)
+
+      let regex = new RegExp(this.props.tableSettings.searchString, 'i')
 
       data = data.filter(x => {
         for(let prop in x) {
@@ -113,22 +113,26 @@ class Table extends React.Component {
       })
     }
 
+    let columnHeaders = []
+
     // empty header cell for the row select
-    let columnHeaders = [
-      (<th key='row-selector'></th>)
-    ]
+    if(this.props.enabledFeatures && this.props.enabledFeatures.includes('row selectors')) {
+      columnHeaders.push(<th key='row-selector'></th>)
+    }
 
     // get column headers from the first object's properties
     for(let prop in data[0]) {
-      if(!this.props.table.hiddenTableProperties.includes(prop)) {
-        let className = this.props.table.currentSortColumn === prop ? 'column-header-sorted' : 'column-header'
+      if(!this.props.tableSettings.hiddenTableProperties.includes(prop)) {
+        let className = this.props.tableSettings.currentSortColumn === prop ? 'column-header-sorted' : 'column-header'
         columnHeaders.push(
           <th
             className={className}
             key={prop}
             name={prop}
             onClick={e => {
-              this.sortColumn(e.target.getAttribute('name'))
+              if(this.props.enabledFeatures && this.props.enabledFeatures.includes('column sorting')) {
+                this.sortColumn(e.target.getAttribute('name'))
+              }
             }}
           >
             {prop}
@@ -156,9 +160,11 @@ class Table extends React.Component {
           onUpdateRowButtonClicked={this.onUpdateRowButtonClicked}
           onSingleViewRowButtonClicked={this.onSingleViewRowButtonClicked}
           onEventsRowButtonClicked={this.onEventsRowButtonClicked}
-          hiddenTableProperties={this.props.table.hiddenTableProperties}
-          table={this.props.table}
+          hiddenTableProperties={this.props.tableSettings.hiddenTableProperties}
+          tableSettings={this.props.tableSettings}
           rowSelectorClicked={this.props.rowSelectorClicked}
+          customRowButtons={this.props.customRowButtons}
+          enabledFeatures={this.props.enabledFeatures}
         />
       )
     })
@@ -171,8 +177,9 @@ class Table extends React.Component {
       <div id='table-wrapper'>
         <ControlBar
           data={this.props.data}
-          table={this.props.table}
-          updateGlobalState={this.props.updateGlobalState}
+          tableSettings={this.props.tableSettings}
+          updateTableSettings={this.props.updateTableSettings}
+          enabledFeatures={this.props.enabledFeatures}
         />
         {table}
       </div>
@@ -190,32 +197,35 @@ class Table extends React.Component {
 
 
 class ControlBar extends React.Component {
-  // constructor(props) {
-  //   super(props)
-  // }
+  build = () => {
+    let elements = []
+
+    if(this.props.enabledFeatures && this.props.enabledFeatures.includes('search')) {
+      elements.push(<SearchBox
+        key='searchbox'
+        data={this.props.data}
+        tableSettings={this.props.tableSettings}
+        updateTableSettings={this.props.updateTableSettings}
+      />)
+    }
+
+    return elements
+  }
 
   render() {
     return (
       <div id='table-control-bar'>
-        <SearchBox
-          data={this.props.data}
-          table={this.props.table}
-          updateGlobalState={this.props.updateGlobalState}
-        />
+        {this.build()}
       </div>
     )
   }
 }
 
 class SearchBox extends React.Component {
-  // constructor(props) {
-  //   super(props)
-  // }
-
   search = searchString => {
-    let table = clone(this.props.table)
-    table.searchString = searchString
-    this.props.updateGlobalState({table: table})
+    let tableSettings = clone(this.props.tableSettings)
+    tableSettings.searchString = searchString
+    this.props.updateTableSettings(tableSettings)
   }
 
   render() {
@@ -236,29 +246,25 @@ class SearchBox extends React.Component {
 
 
 class Row extends React.Component {
-  // constructor(props) {
-  //   super(props)
-  //   // this.state = {}
-  // }
-
   render() {
     let cells = []
 
-    let checked = this.props.table.selectedEntryIds.includes(this.props.entry.id) ? true : false
-
-    cells.push(
-      <Cell key='row-selector'>
-        <input
-          type='checkbox'
-          className='row-selector-checkbox'
-          data-entry-id={this.props.entry.id}
-          onChange={e => {
-            this.props.rowSelectorClicked(+e.target.getAttribute('data-entry-id'))
-          }}
-          checked={checked}
-        />
-      </Cell>
-    )
+    if(this.props.enabledFeatures && this.props.enabledFeatures.includes('row selectors')) {
+      let checked = this.props.tableSettings.selectedEntryIds.includes(this.props.entry.id) ? true : false
+      cells.push(
+        <Cell key='row-selector'>
+          <input
+            type='checkbox'
+            className='row-selector-checkbox'
+            data-entry-id={this.props.entry.id}
+            onChange={e => {
+              this.props.rowSelectorClicked(+e.target.getAttribute('data-entry-id'))
+            }}
+            checked={checked}
+          />
+        </Cell>
+      )
+    }
 
     for(let prop in this.props.entry) {
       if(!this.props.hiddenTableProperties.includes(prop)) {
@@ -272,17 +278,47 @@ class Row extends React.Component {
         }
       }
     }
+    
+    let buttons = []
 
-    let buttons = [
-      <td key='up'><RowButton classes='button-move-row-up glyphicon glyphicon-arrow-up' entryId={this.props.entry.id} clicked={this.props.onMoveRowUpButtonClicked} /></td>,
-      <td key='down'><RowButton classes='button-move-row-down glyphicon glyphicon-arrow-down' entryId={this.props.entry.id} clicked={this.props.onMoveRowDownButtonClicked} /></td>,
-      <td key='delete'><RowButton classes='button-delete-row glyphicon glyphicon-trash' entryId={this.props.entry.id} clicked={this.props.onDeleteRowButtonClicked} /></td>,
-      <td key='update'><RowButton classes='button-update-row glyphicon glyphicon-edit' entryId={this.props.entry.id} clicked={this.props.onUpdateRowButtonClicked} /></td>,
-      <td key='single-view'><RowButton classes='button-single-view-row glyphicon glyphicon-eye-open' entryId={this.props.entry.id} clicked={this.props.onSingleViewRowButtonClicked} /></td>,
-      <td key='events'><RowButton classes='button-events-row glyphicon glyphicon-list' entryId={this.props.entry.id} clicked={this.props.onEventsRowButtonClicked} /></td>
-    ]
+    
 
-    return <tr 
+    if(this.props.enabledFeatures && this.props.enabledFeatures.includes('delete')) {
+      buttons.push(<td key='delete'><RowButton classes='button-delete-row glyphicon glyphicon-trash' entryId={this.props.entry.id} clicked={this.props.onDeleteRowButtonClicked} /></td>)
+    }
+
+    if(this.props.enabledFeatures && this.props.enabledFeatures.includes('update')) {
+      buttons.push(<td key='update'><RowButton classes='button-update-row glyphicon glyphicon-edit' entryId={this.props.entry.id} clicked={this.props.onUpdateRowButtonClicked} /></td>)
+    }
+    
+    if(this.props.enabledFeatures && this.props.enabledFeatures.includes('view')) {
+      buttons.push(<td key='single-view'><RowButton classes='button-single-view-row glyphicon glyphicon-eye-open' entryId={this.props.entry.id} clicked={this.props.onSingleViewRowButtonClicked} /></td>)
+    }
+
+    if(this.props.enabledFeatures && this.props.enabledFeatures.includes('row transiency')) {
+      buttons.push(<td key='up'> <RowButton classes='button-move-row-up glyphicon glyphicon-arrow-up' entryId={this.props.entry.id} clicked={this.props.onMoveRowUpButtonClicked} /></td>)
+      buttons.push(<td key='down'><RowButton classes='button-move-row-down glyphicon glyphicon-arrow-down' entryId={this.props.entry.id} clicked={this.props.onMoveRowDownButtonClicked} /></td>)
+    }
+
+    if(this.props.customRowButtons && this.props.customRowButtons.length !== 0) {
+      this.props.customRowButtons.forEach(x => {
+        let classes = `button-${x.key}-row glyphicon glyphicon-${x.glyphicon}`
+        buttons.push(
+          <td key={x.key}>
+            <RowButton
+              classes={classes}
+              entryId={this.props.entry.id}
+              clicked={e => {
+                let id = +e.target.getAttribute('data-entry-id')
+                x.handler(id)
+              }}
+            />
+          </td>
+        )
+      })
+    }
+
+    return <tr
       data-entry-id={this.props.entry.id} // hook for gui tests
       data-entry-company={this.props.entry.company} // hook for gui tests
     >{cells}{buttons}</tr>

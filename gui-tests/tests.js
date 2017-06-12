@@ -3,7 +3,12 @@
 const assert = require('assert')
 const moment = require('moment')
 const URL = 'http://localhost:3000/'
-const testBase = require('./test-state.json')
+
+// silo'd and old
+// const testBase = require('./test-state.json')
+
+// grabbing the same test data the app uses
+import { data as testBase } from './../src/sample-data/data1.js'
 
 const newEntryData = {
   company: 'new company',
@@ -33,7 +38,6 @@ describe('Operation Silver', function() {
   it('should work', function() {
     let title = browser.getTitle()
     assert.equal(title, 'Operation Silver')
-    browser.click('#reload-state-from-local-storage-button')
   })
 
   it('should work again', function() {

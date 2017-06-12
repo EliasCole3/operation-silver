@@ -10,7 +10,27 @@ let data = {
       created: 1497130826780,
       updated: 1497130826780,
       events: [
-        'created: 06.10.17'
+        {
+          id: 1,
+          sortOrder: 1,
+          value: 'created: 06.10.17',
+          created: 1497130826780,
+          updated: 1497130826780
+        },
+        {
+          id: 2,
+          sortOrder: 2,
+          value: 'Messaged someone',
+          created: 1497130840000,
+          updated: 1497130840000
+        },
+        {
+          id: 3,
+          sortOrder: 3,
+          value: 'to do for this entry\n-----------------\nasdf\nasdf\nasdf',
+          created: 1497130860000,
+          updated: 1497130860000
+        }
       ]
     },
     {
@@ -23,7 +43,13 @@ let data = {
       created: 1497130826780,
       updated: 1497130826780,
       events: [
-        'created: 06.10.17'
+        {
+          id: 1,
+          sortOrder: 1,
+          value: 'created: 06.10.17',
+          created: 1497130826780,
+          updated: 1497130826780
+        }
       ]
     },
     {
@@ -36,7 +62,13 @@ let data = {
       created: 1497130826780,
       updated: 1497130826780,
       events: [
-        'created: 06.10.17'
+        {
+          id: 1,
+          sortOrder: 1,
+          value: 'created: 06.10.17',
+          created: 1497130826780,
+          updated: 1497130826780
+        }
       ]
     }
   ],
@@ -45,15 +77,26 @@ let data = {
   entryToUpdate: null,
   entryWithEventsToUpdate: null,
   singleViewEntry: null,
-  table: {
-    currentSortColumn: null,
-    currentSortDirection: 'ascending',
-    selectedEntryIds: [2],
-    searchString: '',
-    hiddenTableProperties: [
-      'sortOrder',
-      'events'
-    ]
+  tableSettings: {
+    entries: {
+      currentSortColumn: null,
+      currentSortDirection: 'ascending',
+      selectedEntryIds: [2],
+      searchString: '',
+      hiddenTableProperties: [
+        'sortOrder',
+        'events'
+      ]
+    },
+    events: {
+      currentSortColumn: null,
+      currentSortDirection: 'ascending',
+      selectedEntryIds: [],
+      searchString: '',
+      hiddenTableProperties: [
+        'sortOrder'
+      ]
+    }
   },
   activeTab: 1
 }
