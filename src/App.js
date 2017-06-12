@@ -6,7 +6,8 @@ import './styles/react-simpletabs.css'
 // import logo from './logo.svg'
 
 // external libraries
-import Tabs from 'react-simpletabs'
+// import Tabs from 'react-simpletabs'
+import Tabs from './scripts/react-simpletabs'
 const moment = require('moment')
 // import * as bs from 'react-bootstrap'
 
@@ -155,27 +156,6 @@ class App extends Component {
     newId++
     localStorage.setItem('operation-silver-last-id', JSON.stringify(newId))
     return newId
-  }
-
-  getModalBody = () => {
-    if(this.state.entryToUpdate) {
-      return (<UpdateEntryForm
-        entryToUpdate={this.state.entryToUpdate}
-        updateEntry={this.updateEntry}
-        afterUpdate={() => {
-          this.closeModal()
-        }}
-      />)
-    }
-    if(this.state.eventsToUpdate) {
-      return (
-        JSON.stringify(this.state.eventsToUpdate, null, 2)
-      )
-    }
-  }
-
-  getModalTitle = () => {
-    return 
   }
 
   getModalInfo = () => {

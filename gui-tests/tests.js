@@ -42,8 +42,7 @@ describe('Operation Silver', function() {
   })
 
   it('can create an entry', () => {
-    let tabNodes = $$('.tabs-menu-item')
-    let tabs = determineTabs(tabNodes)
+    let tabs = determineTabs()
     tabs['New'].click()
     browser.setValue('#new-form-company', newEntryData.company)
     browser.setValue('#new-form-description', newEntryData.description)
@@ -104,8 +103,9 @@ browser.localStorage('POST', { key: 'operation-silver-data', value: JSON.stringi
 
 */
 
-function determineTabs(tabNodes) {
+function determineTabs() {
   let obj = {}
+  let tabNodes = $$('.tabs-menu-item')
   tabNodes.forEach(x => {
     obj[x.$('a').getText()] = $$('.tabs-menu-item')[x.index]
   })
