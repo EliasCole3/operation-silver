@@ -70,10 +70,15 @@ class Table extends React.Component {
   }
 
   onUpdateRowButtonClicked = e => {
-    // let id = +e.target.getAttribute('data-entry-id')
+    let id = +e.target.getAttribute('data-entry-id')
     // this.props.showUpdateForm(id)
+    let entryToUpdate = this.props.data.filter(x => {
+      return x.id === id
+    })[0]
     let tableSettings = clone(this.props.tableSettings)
     tableSettings.modalOpen = true
+    tableSettings.modalSetting = 'update'
+    tableSettings.entryToUpdate = entryToUpdate
     this.props.updateTableSettingsOrData({ settings: tableSettings })
   }
 
@@ -143,6 +148,7 @@ class Table extends React.Component {
   addEntry = formData => {
     let data = clone(this.props.data)
 
+    // todo: make this an overridable default. Or make it not terrible. Either way...
     let newId = data.sort((x, y) => {
       // sort descending
       if(x.id > y.id) return -1
@@ -150,26 +156,46 @@ class Table extends React.Component {
       return 0
     })[0].id + 1
 
-    // let newId = this.props.getNewId()
-
-    // let newEntry = {
-    //   id: newId,
-    //   sortOrder: newId,
-    //   created: moment().format('x'),
-    //   updated: moment().format('x')
-    // }
-
-    // for(let prop in formData) {
-    //   newEntry[prop] = formData[prop]
-    // }
-
     let newEntry = this.createNewFullObject({id: newId, formData: formData})
-
-    console.log(newEntry)
-
     data.push(newEntry)
-
     this.props.updateTableSettingsOrData({ data: data })
+  }
+
+  updateEntry = formData => {
+    let data = clone(this.props.data)
+    let oldEntry = clone(this.props.tableSettings.entryToUpdate)
+    let index = data.findIndex(x => {
+      return x.id === oldEntry.id
+    })
+
+    // todo: an actual diff. Maybe mod copyNonstandardFieldsRecursively to do it too
+    data[index].updated = moment().format('x')
+    data[index] = this.copyNonstandardFieldsRecursively(data[index], formData)
+    this.props.updateTableSettingsOrData({ data: data })
+  }
+
+  copyNonstandardFieldsRecursively = (newObj, oldObj) => {
+    let propertiesToNotCopy = [
+      'id',
+      'sortOrder',
+      'created',
+      'updated'
+    ]
+
+    for(let prop in oldObj) {
+      if(dataTypeOf(oldObj[prop]) === 'array') {
+        newObj[prop] = []
+        oldObj[prop].forEach(x => {
+          newObj[prop].push(this.copyNonstandardFieldsRecursively({}, x))
+        })
+      } else {
+        if(!propertiesToNotCopy.includes(prop)) {
+          newObj[prop] = oldObj[prop]
+        }
+      }
+    }
+
+    return newObj
   }
 
   getModalInfo = () => {
@@ -183,13 +209,9 @@ class Table extends React.Component {
       obj.body = <Form
         schema={this.props.modelSchema}
         uiSchema={this.props.uiSchema}
-        onChange={() => {
-          console.log('changed')
-        }}
+        onChange={() => {}}
         onSubmit={e => {
           this.addEntry(e.formData)
-          console.log(e.formData)
-          console.log('submitted')
         }}
         onError={errors => {
           console.log('errors')
@@ -197,9 +219,22 @@ class Table extends React.Component {
         }}
       />
     }
+
     if(this.props.tableSettings.modalSetting === 'update') {
-      obj.title = `Updating events for entry asdf`
-      obj.body = 'form'
+      obj.title = `Updating events for entry ${this.props.tableSettings.entryToUpdate.id}`
+      obj.body = obj.body = <Form
+        schema={this.props.modelSchema}
+        uiSchema={this.props.uiSchema}
+        formData={this.copyNonstandardFieldsRecursively({}, this.props.tableSettings.entryToUpdate)}
+        onChange={() => {}}
+        onSubmit={e => {
+          this.updateEntry(e.formData)
+        }}
+        onError={errors => {
+          console.log('errors')
+          console.log(errors)
+        }}
+      />
     }
 
     return obj
@@ -207,8 +242,6 @@ class Table extends React.Component {
 
   buildTable() {
     let data = clone(this.props.data)
-
-    // console.log(this.props.tableSettings)
 
     // filter the table data down based on the search string
     if(this.props.tableSettings.searchString !== '') {
@@ -283,6 +316,8 @@ class Table extends React.Component {
 
     let table = <table id='table' className='table'>{thead}{tbody}</table>
 
+    let modalInfo = this.getModalInfo()
+
     let fullTable = (
       <div id='table-wrapper'>
 
@@ -300,11 +335,12 @@ class Table extends React.Component {
           close={() => {
             let tableSettings = clone(this.props.tableSettings)
             tableSettings.modalOpen = false
+            tableSettings.modalSetting = null
             this.props.updateTableSettingsOrData({ settings: tableSettings })
           }}
-          title={this.getModalInfo().title}
-          body={this.getModalInfo().body}
-          footer={this.getModalInfo().footer}
+          title={modalInfo.title}
+          body={modalInfo.body}
+          footer={modalInfo.footer}
         />
 
       </div>

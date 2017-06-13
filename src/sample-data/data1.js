@@ -84,7 +84,8 @@ let data = {
       selectedEntryIds: [2],
       searchString: '',
       modalOpen: false,
-      modalSetting: null
+      modalSetting: null,
+      entryToUpdate: null
     },
     events: {
       currentSortColumn: null,
@@ -92,7 +93,8 @@ let data = {
       selectedEntryIds: [],
       searchString: '',
       modalOpen: false,
-      modalSetting: null
+      modalSetting: null,
+      entryToUpdate: null
     }
   },
   activeTab: 1

@@ -107,6 +107,12 @@ td {
   font-size:0;
 }
 
+#reload-state-from-local-storage-input {
+  background: transparent;
+  border: none !important;
+  font-size:0;
+}
+
 .create-button {
   margin-right: 15px;
 }

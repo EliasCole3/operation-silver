@@ -408,6 +408,9 @@ class App extends Component {
 
         {/*for gui tests*/}
         <button id='reload-state-from-local-storage-button' onClick={this.reloadStateFromLocalStorage}></button>
+        <input id='reload-state-from-local-storage-input' onChange={() => {
+          this.reloadStateFromLocalStorage()
+        }} />
 
         {/*<Modal
           show={this.state.modalOpen}

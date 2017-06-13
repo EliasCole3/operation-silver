@@ -32,7 +32,9 @@ describe('Operation Silver', function() {
     browser.url(URL)
     browser.localStorage('POST', { key: 'operation-silver-data', value: JSON.stringify(testBase) })
     browser.localStorage('POST', { key: 'operation-silver-last-id', value: '3'})
-    browser.click('#reload-state-from-local-storage-button')
+
+    // browser.click('#reload-state-from-local-storage-button')
+    browser.setValue('#reload-state-from-local-storage-input', 'i')
   })
 
   it('should work', function() {
@@ -78,6 +80,13 @@ describe('Operation Silver', function() {
     // todo: update when molly guards are added
 
     assert.equal(browser.isExisting(`tr[data-entry-company='${testBase.data[0].company}']`), false)
+  })
+
+
+
+  it('can colum sort', () => {
+    browser.click(`th.column-header[name='company']`)
+    browser.pause(15 * 1000)      
   })
 
 })
