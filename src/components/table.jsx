@@ -71,7 +71,6 @@ class Table extends React.Component {
 
   onUpdateRowButtonClicked = e => {
     let id = +e.target.getAttribute('data-entry-id')
-    // this.props.showUpdateForm(id)
     let entryToUpdate = this.props.data.filter(x => {
       return x.id === id
     })[0]
@@ -85,11 +84,6 @@ class Table extends React.Component {
   onSingleViewRowButtonClicked = e => {
     let id = +e.target.getAttribute('data-entry-id')
     this.props.showSingleView(id)
-  }
-
-  onEventsRowButtonClicked = e => {
-    let id = +e.target.getAttribute('data-entry-id')
-    this.props.showEventsView(id)
   }
 
   sortColumn = column => {
@@ -145,23 +139,31 @@ class Table extends React.Component {
     return newEntry
   }
 
-  addEntry = formData => {
+  addEntry = (formData, callback=null) => {
     let data = clone(this.props.data)
 
     // todo: make this an overridable default. Or make it not terrible. Either way...
-    let newId = data.sort((x, y) => {
+    let entryWithHighestId = data.sort((x, y) => {
       // sort descending
       if(x.id > y.id) return -1
       if(x.id < y.id) return 1
       return 0
-    })[0].id + 1
+    })[0]
+
+    let newId
+    // it'll be undefined if the array is empty
+    if(entryWithHighestId) {
+      newId = entryWithHighestId.id + 1
+    } else {
+      newId = 1
+    }
 
     let newEntry = this.createNewFullObject({id: newId, formData: formData})
     data.push(newEntry)
-    this.props.updateTableSettingsOrData({ data: data })
+    this.props.updateTableSettingsOrData({ data: data, callback: callback })
   }
 
-  updateEntry = formData => {
+  updateEntry = (formData, callback=null) => {
     let data = clone(this.props.data)
     let oldEntry = clone(this.props.tableSettings.entryToUpdate)
     let index = data.findIndex(x => {
@@ -171,7 +173,7 @@ class Table extends React.Component {
     // todo: an actual diff. Maybe mod copyNonstandardFieldsRecursively to do it too
     data[index].updated = moment().format('x')
     data[index] = this.copyNonstandardFieldsRecursively(data[index], formData)
-    this.props.updateTableSettingsOrData({ data: data })
+    this.props.updateTableSettingsOrData({ data: data, callback: callback })
   }
 
   copyNonstandardFieldsRecursively = (newObj, oldObj) => {
@@ -211,7 +213,8 @@ class Table extends React.Component {
         uiSchema={this.props.uiSchema}
         onChange={() => {}}
         onSubmit={e => {
-          this.addEntry(e.formData)
+          this.addEntry(e.formData, this.clearModalDataAndClose)
+          {/*this.clearModalDataAndClose()*/}
         }}
         onError={errors => {
           console.log('errors')
@@ -228,7 +231,7 @@ class Table extends React.Component {
         formData={this.copyNonstandardFieldsRecursively({}, this.props.tableSettings.entryToUpdate)}
         onChange={() => {}}
         onSubmit={e => {
-          this.updateEntry(e.formData)
+          this.updateEntry(e.formData, this.clearModalDataAndClose)
         }}
         onError={errors => {
           console.log('errors')
@@ -238,6 +241,14 @@ class Table extends React.Component {
     }
 
     return obj
+  }
+
+  clearModalDataAndClose = () => {
+    let tableSettings = clone(this.props.tableSettings)
+    tableSettings.modalOpen = false
+    tableSettings.modalSetting = null
+    tableSettings.entryToUpdate = null
+    this.props.updateTableSettingsOrData({ settings: tableSettings })
   }
 
   buildTable() {
@@ -301,7 +312,6 @@ class Table extends React.Component {
           onDeleteRowButtonClicked={this.onDeleteRowButtonClicked}
           onUpdateRowButtonClicked={this.onUpdateRowButtonClicked}
           onSingleViewRowButtonClicked={this.onSingleViewRowButtonClicked}
-          onEventsRowButtonClicked={this.onEventsRowButtonClicked}
           tableSettings={this.props.tableSettings}
           rowSelectorClicked={this.props.rowSelectorClicked}
           customRowButtons={this.props.customRowButtons}

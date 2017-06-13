@@ -105,7 +105,6 @@ class App extends Component {
     let entryToShow = this.state.data.filter(x => {
       return x.id === id
     })[0]
-    console.log('called')
     this.setState({
       activeTab: 3,
       singleViewEntry: entryToShow
@@ -116,7 +115,7 @@ class App extends Component {
     let entry = this.state.data.filter(x => {
       return x.id === id
     })[0]
-    console.log(entry)
+    if(!entry.events) entry.events = []
     this.setState({
       activeTab: 4,
       entryWithEventsToUpdate: entry
@@ -136,15 +135,17 @@ class App extends Component {
   }
 
   rowSelectorClicked = entryId => {
-    let newState = clone(this.state)
+    // let newState = clone(this.state)
 
-    if(newState.table.selectedEntryIds.includes(entryId)) {
-      newState.table.selectedEntryIds = newState.table.selectedEntryIds.filter(x => { return x !== entryId })
-    } else {
-      newState.table.selectedEntryIds.push(entryId)
-    }
+    // if(newState.table.selectedEntryIds.includes(entryId)) {
+    //   newState.table.selectedEntryIds = newState.table.selectedEntryIds.filter(x => { return x !== entryId })
+    // } else {
+    //   newState.table.selectedEntryIds.push(entryId)
+    // }
 
-    this.setState(newState, this.updateLocalStorage)
+    // this.setState(newState, this.updateLocalStorage)
+
+    console.log(`rowSelectorClicked called`)
   }
 
   getNewId = () => {
@@ -187,14 +188,14 @@ class App extends Component {
       return (
         <Table
           enabledFeatures={[
-            'row selectors',
-            'row transiency',
-            'column sorting',
-            'search',
             'create',
-            'delete',
+            'view',
             'update',
-            'view'
+            'delete',
+            'search',
+            'column sorting',
+            'row selectors',
+            'row transiency'
           ]}
           customRowButtons={[
             {
@@ -216,12 +217,12 @@ class App extends Component {
               state.tableSettings.entries = params.settings
             }
 
-            this.setState(state, this.updateLocalStorage)
+            this.setState(state, () => {
+              this.updateLocalStorage
+              if(params.callback) params.callback()
+            })
           }}
-          updateEntry={this.updateEntry}
-          showUpdateForm={this.showUpdateForm}
           showSingleView={this.showSingleView}
-          showEventsView={this.showEventsView}
           rowSelectorClicked={this.rowSelectorClicked}
           modelSchema={{
             title: 'Entry',
@@ -289,12 +290,13 @@ class App extends Component {
           <h2>Events view for {this.state.entryWithEventsToUpdate.company}</h2>
           <Table
             enabledFeatures={[
-              'row selectors',
-              'row transiency',
-              'column sorting',
-              'search',
+              'create',
+              'update',
               'delete',
-              'update'
+              'search',
+              'column sorting',
+              'row selectors',
+              'row transiency'
             ]}
             data={this.state.entryWithEventsToUpdate.events}
             tableSettings={this.state.tableSettings.events}
@@ -313,11 +315,39 @@ class App extends Component {
                 state.tableSettings.events = params.settings
               }
 
-              this.setState(state, this.updateLocalStorage)
+              this.setState(state, () => {
+                this.updateLocalStorage
+                if(params.callback) params.callback()
+              })
             }}
-            updateEntry={this.updateEntry}
-            showUpdateForm={this.showUpdateForm}
             rowSelectorClicked={this.rowSelectorClicked}
+            modelSchema={{
+              title: 'Event',
+              type: 'object',
+              required: ['value'],
+              properties: {
+                value: { type: 'string', title: 'Value' },
+              }
+            }}
+            uiSchema={{
+              'ui:rootFieldId': 'entry.event',
+              'ui:order': [
+                'value'
+              ],
+              value: {
+                'ui:autofocus': true,
+                'ui:widget': 'textarea',
+                'ui:options': {
+                  rows: 7
+                }
+              }
+            }}
+            columnOrder={[
+              'id',
+              'value',
+              'created',
+              'updated'
+            ]}
           />
         </div>
       )
@@ -398,7 +428,7 @@ class App extends Component {
 
           <Tabs.Panel title='Events'>
             <div id='events-table-wrapper'>
-              {/*{this.getEventsTable()}*/}
+              {this.getEventsTable()}
             </div>
           </Tabs.Panel>
 
