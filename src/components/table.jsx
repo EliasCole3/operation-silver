@@ -11,7 +11,7 @@ class Table extends React.Component {
 
   constructor(props) {
     super(props)
-    this.state = {}
+    let state = {}
 
     // if columnOrder isn't included in the Table config
     if(!this.props.columnOrder) {
@@ -23,7 +23,8 @@ class Table extends React.Component {
         }
       }
       columnOrder.sort()
-      this.state.columnOrder = columnOrder
+      state.columnOrder = columnOrder
+      this.state = state
     }
   }
 

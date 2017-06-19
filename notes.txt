@@ -18,8 +18,17 @@ settings
  - after create new entry
   - switch to table view
   - switch to single view
+Confirmation on load
+Pull in changes from event-tracker
 
 
+Resources
+---------------------
+http://webdriver.io/api.html
+https://momentjs.com/docs/#/displaying/
+http://getbootstrap.com/components/
+https://www.npmjs.com/package/react-jsonschema-form
+https://www.npmjs.com/package/react-bootstrap-datetimepicker
 
 
 
@@ -38,6 +47,8 @@ $$('.tabs-menu-item')
 
 
 
+
+node_modules/.bin/serve -s build
 
 
 

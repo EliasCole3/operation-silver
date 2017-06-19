@@ -218,7 +218,7 @@ class App extends Component {
             }
 
             this.setState(state, () => {
-              this.updateLocalStorage
+              this.updateLocalStorage()
               if(params.callback) params.callback()
             })
           }}
@@ -316,7 +316,7 @@ class App extends Component {
               }
 
               this.setState(state, () => {
-                this.updateLocalStorage
+                this.updateLocalStorage()
                 if(params.callback) params.callback()
               })
             }}
