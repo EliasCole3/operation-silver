@@ -4,7 +4,7 @@ import { clone } from '../toolbox/clone'
 const moment = require('moment')
 import { Modal } from './bs-modal-wrapper'
 import Form from 'react-jsonschema-form'
-import {dataTypeOf} from './../toolbox/data-type-of'
+import { dataTypeOf } from './../toolbox/data-type-of'
 // import { findPatternInData } from '../toolbox/find-pattern-in-data'
 
 class Table extends React.Component {
@@ -126,10 +126,8 @@ class Table extends React.Component {
       // todo: make this optional?
       if(dataTypeOf(params.formData[prop]) === 'array') {
         let values = []
-        console.log(dataTypeOf(params.formData[prop]))
-        console.log(params.formData[prop])
-        params.formData[prop].forEach((x, i)=> {
-          values.push(this.createNewFullObject({id: i+1, formData: x}))
+        params.formData[prop].forEach((x, i) => {
+          values.push(this.createNewFullObject({ id: i + 1, formData: x }))
         })
         newEntry[prop] = values
       } else {
@@ -140,7 +138,7 @@ class Table extends React.Component {
     return newEntry
   }
 
-  addEntry = (formData, callback=null) => {
+  addEntry = (formData, callback = null) => {
     let data = clone(this.props.data)
 
     // todo: make this an overridable default. Or make it not terrible. Either way...
@@ -159,12 +157,12 @@ class Table extends React.Component {
       newId = 1
     }
 
-    let newEntry = this.createNewFullObject({id: newId, formData: formData})
+    let newEntry = this.createNewFullObject({ id: newId, formData: formData })
     data.push(newEntry)
     this.props.updateTableSettingsOrData({ data: data, callback: callback })
   }
 
-  updateEntry = (formData, callback=null) => {
+  updateEntry = (formData, callback = null) => {
     let data = clone(this.props.data)
     let oldEntry = clone(this.props.tableSettings.entryToUpdate)
     let index = data.findIndex(x => {
@@ -212,10 +210,10 @@ class Table extends React.Component {
       obj.body = <Form
         schema={this.props.modelSchema}
         uiSchema={this.props.uiSchema}
-        onChange={() => {}}
+        onChange={() => { }}
         onSubmit={e => {
           this.addEntry(e.formData, this.clearModalDataAndClose)
-          {/*this.clearModalDataAndClose()*/}
+          {/*this.clearModalDataAndClose()*/ }
         }}
         onError={errors => {
           console.log('errors')
@@ -230,7 +228,7 @@ class Table extends React.Component {
         schema={this.props.modelSchema}
         uiSchema={this.props.uiSchema}
         formData={this.copyNonstandardFieldsRecursively({}, this.props.tableSettings.entryToUpdate)}
-        onChange={() => {}}
+        onChange={() => { }}
         onSubmit={e => {
           this.updateEntry(e.formData, this.clearModalDataAndClose)
         }}
@@ -290,7 +288,7 @@ class Table extends React.Component {
             }
           }}
         >
-          {x}
+          {this.props.columnHeaderMap ? this.props.columnHeaderMap[x] : x}
         </th>
       )
     })
@@ -319,6 +317,7 @@ class Table extends React.Component {
           enabledFeatures={this.props.enabledFeatures}
           updateTableSettingsOrData={this.props.updateTableSettingsOrData}
           columnOrder={this.props.columnOrder ? this.props.columnOrder : this.state.columnOrder}
+          propertiesWithCustomDatetimeFormatters={this.props.propertiesWithCustomDatetimeFormatters}
         />
       )
     })
@@ -452,14 +451,18 @@ class Row extends React.Component {
     }
 
     this.props.columnOrder.forEach(x => {
+      let value
+      let customFormatString = this.props.propertiesWithCustomDatetimeFormatters ? this.props.propertiesWithCustomDatetimeFormatters[x] : null
+
       if(x === 'created' || x === 'updated') {
-        // let value = moment(this.props.entry[prop], 'x').format('MM.DD.YY h:mm:ss a')
-        // let value = moment(this.props.entry[prop], 'x').format('MM.DD.YY')
-        let value = moment(this.props.entry[x], 'x').format('MM/DD/YY HH:mm:ss')
-        cells.push(<Cell value={value} key={x} />)
+        value = moment(this.props.entry[x], 'x').format('MM/DD/YY HH:mm:ss')
+      } else if(customFormatString) {
+        value = moment(this.props.entry[x], 'x').format(customFormatString)
       } else {
-        cells.push(<Cell value={this.props.entry[x]} key={x} />)
+        value = this.props.entry[x]
       }
+
+      cells.push(<Cell value={value} key={x} />)
     })
 
 

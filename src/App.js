@@ -19,6 +19,7 @@ import { Modal } from './components/bs-modal-wrapper'
 import { clone } from './toolbox/clone'
 import { savefile } from './toolbox/savefile'
 import { loadfile } from './toolbox/loadfile'
+import { dataTypeOf } from './toolbox/data-type-of'
 // import * as main from './main.js'
 // import { Class1 } from './components/test-components'
 
@@ -106,9 +107,17 @@ class App extends Component {
       return x.id === id
     })[0]
     this.setState({
-      activeTab: 3,
+      activeTab: 2,
       singleViewEntry: entryToShow
     }, this.updateLocalStorage)
+  }
+
+  getSingleView = () => {
+    if(this.state.singleViewEntry) {
+      return JSON.stringify(this.state.singleViewEntry, null, 2)
+    } else {
+      return 'Click one of the row\'s eye buttons :)'
+    }
   }
 
   showEventsView = id => {
@@ -117,7 +126,7 @@ class App extends Component {
     })[0]
     if(!entry.events) entry.events = []
     this.setState({
-      activeTab: 4,
+      activeTab: 3,
       entryWithEventsToUpdate: entry
     }, this.updateLocalStorage)
   }
@@ -183,7 +192,75 @@ class App extends Component {
     this.setState({ activeTab: index }, this.updateLocalStorage)
   }
 
+  createNewFullObject = params => {
+    let newEntry = {
+      id: params.id,
+      sortOrder: params.id,
+      created: moment().format('x'),
+      updated: moment().format('x')
+    }
+
+    for(let prop in params.formData) {
+      // todo: make this optional?
+      if(dataTypeOf(params.formData[prop]) === 'array') {
+        let values = []
+        params.formData[prop].forEach((x, i) => {
+          values.push(this.createNewFullObject({ id: i + 1, formData: x }))
+        })
+        newEntry[prop] = values
+      } else {
+        newEntry[prop] = params.formData[prop]
+      }
+    }
+
+    return newEntry
+  }
+
   getEntriesTable = () => {
+    let modelSchema = {
+      title: 'Entry',
+      type: 'object',
+      required: ['company', 'jobTitle'],
+      properties: {
+        company: { type: 'string', title: 'Company' },
+        description: { type: 'string', title: 'Description' },
+        jobTitle: { type: 'string', title: 'Job Title' },
+        notes: { type: 'string', title: 'Notes' },
+        events: {
+          type: 'array', title: 'Events', items: {
+            type: 'object', properties: {
+              value: { type: 'string' }
+            }
+          }
+        }
+      }
+    }
+
+    let uiSchema = {
+      'ui:rootFieldId': 'entry',
+      'ui:order': [
+        'company',
+        'description',
+        'jobTitle',
+        'notes',
+        'events'
+      ],
+      company: {
+        'ui:autofocus': true
+      },
+      description: {
+        // 'ui:help': 'should be short',
+        'ui:placeholder': 'should be short'
+      },
+      jobTitle: {},
+      notes: {
+        'ui:widget': 'textarea',
+        'ui:options': {
+          rows: 7
+        }
+      }
+    }
+
     if(this.state.data.length !== 0) {
       return (
         <Table
@@ -224,46 +301,8 @@ class App extends Component {
           }}
           showSingleView={this.showSingleView}
           rowSelectorClicked={this.rowSelectorClicked}
-          modelSchema={{
-            title: 'Entry',
-            type: 'object',
-            required: ['company', 'jobTitle'],
-            properties: {
-              company: { type: 'string', title: 'Company' },
-              description: { type: 'string', title: 'Description' },
-              jobTitle: { type: 'string', title: 'Job Title' },
-              notes: { type: 'string', title: 'Notes' },
-              events: { type: 'array', title: 'Events', items: {
-                type: 'object', properties: {
-                  value: { type: 'string'}
-                }
-              }}
-            }
-          }}
-          uiSchema={{
-            'ui:rootFieldId': 'entry',
-            'ui:order': [
-              'company',
-              'description',
-              'jobTitle',
-              'notes',
-              'events'
-            ],
-            company: {
-              'ui:autofocus': true
-            },
-            description: {
-              // 'ui:help': 'should be short',
-              'ui:placeholder': 'should be short'
-            },
-            jobTitle: {},
-            notes: {
-              'ui:widget': 'textarea',
-              'ui:options': {
-                rows: 7
-              }
-            }
-          }}
+          modelSchema={modelSchema}
+          uiSchema={uiSchema}
           columnOrder={[
             'id',
             'company',
@@ -273,12 +312,39 @@ class App extends Component {
             'created',
             'updated'
           ]}
+          columnHeaderMap={{
+            id: 'ID',
+            company: 'Company',
+            description: 'Description',
+            jobTitle: 'Job Title',
+            notes: 'Notes',
+            created: 'Created',
+            updated: 'Updated'
+          }}
 
         />
       )
     } else {
       return (
-        <h2>There is no data currently. Please head to 'New' to create an entry :)</h2>
+        <div id='new-entry-form-wrapper'>
+          <Form
+            schema={modelSchema}
+            uiSchema={uiSchema}
+            onChange={() => { }}
+            onSubmit={e => {
+              let state = clone(this.state)
+              let newEntry = this.createNewFullObject({ id: 1, formData: e.formData })
+              state.data.push(newEntry)
+              this.setState(state, () => {
+                this.updateLocalStorage()
+              })
+            }}
+            onError={errors => {
+              console.log('errors')
+              console.log(errors)
+            }}
+          />
+        </div>
       )
     }
   }
@@ -348,6 +414,12 @@ class App extends Component {
               'created',
               'updated'
             ]}
+            columnHeaderMap={{
+              id: 'ID',
+              value: 'Value',
+              created: 'Created',
+              updated: 'Updated'
+            }}
           />
         </div>
       )
@@ -379,6 +451,7 @@ class App extends Component {
         onClick={e => {
           loadfile(data => {
             let newState = JSON.parse(data)
+            newState.activeTab = 1
             this.setState(newState, this.updateLocalStorage)
           })
         }}
@@ -407,21 +480,21 @@ class App extends Component {
           <Tabs.Panel title='Table'>
             {this.getEntriesTable()}
             {this.getStateBox()}
-            {this.getSaveButton()}
-            {this.getLoadButton()}
+            {/*{this.getSaveButton()}*/}
+            {/*{this.getLoadButton()}*/}
           </Tabs.Panel>
 
-          <Tabs.Panel title='New'>
+          {/*<Tabs.Panel title='New'>
             <CreateEntryForm
               addNewEntryToData={this.addNewEntryToData}
               getNewId={this.getNewId}
             />
-          </Tabs.Panel>
+          </Tabs.Panel>*/}
 
           <Tabs.Panel title='Single'>
             <div id='single-view-wrapper'>
               <pre>
-                {JSON.stringify(this.state.singleViewEntry, null, 2)}
+                {this.getSingleView()}
               </pre>
             </div>
           </Tabs.Panel>
@@ -430,6 +503,14 @@ class App extends Component {
             <div id='events-table-wrapper'>
               {this.getEventsTable()}
             </div>
+          </Tabs.Panel>
+
+          <Tabs.Panel title='State Controls'>
+            <br />
+            {this.getSaveButton()}
+            <br />
+            <br />
+            {this.getLoadButton()}
           </Tabs.Panel>
 
         </Tabs>
