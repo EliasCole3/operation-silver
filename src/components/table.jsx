@@ -5,6 +5,7 @@ const moment = require('moment')
 import { Modal } from './bs-modal-wrapper'
 import Form from 'react-jsonschema-form'
 import { dataTypeOf } from './../toolbox/data-type-of'
+import Inflector from 'inflected'
 // import { findPatternInData } from '../toolbox/find-pattern-in-data'
 
 class Table extends React.Component {
@@ -204,8 +205,10 @@ class Table extends React.Component {
     obj.title = ''
     obj.body = ''
     obj.footer = ''
+    
 
     if(this.props.tableSettings.modalSetting === 'create') {
+      let submitId = `${this.props.modelName}-create-submit`
       obj.title = <b>Creating New Entry</b>
       obj.body = <Form
         schema={this.props.modelSchema}
@@ -219,10 +222,13 @@ class Table extends React.Component {
           console.log('errors')
           console.log(errors)
         }}
-      />
+      >
+        <button id={submitId} className='btn btn-info' type='submit'>Submit</button>
+      </Form>
     }
 
     if(this.props.tableSettings.modalSetting === 'update') {
+      let submitId = `${this.props.modelName}-update-submit`
       obj.title = `Updating events for entry ${this.props.tableSettings.entryToUpdate.id}`
       obj.body = obj.body = <Form
         schema={this.props.modelSchema}
@@ -236,7 +242,9 @@ class Table extends React.Component {
           console.log('errors')
           console.log(errors)
         }}
-      />
+      >
+        <button id={submitId} className='btn btn-info' type='submit'>Submit</button>
+      </Form>
     }
 
     return obj
@@ -304,6 +312,7 @@ class Table extends React.Component {
     let rows = data.map(x => {
       return (
         <Row
+          modelName={this.props.modelName}
           entry={x}
           key={x.id}
           onMoveRowUpButtonClicked={this.onMoveRowUpButtonClicked}
@@ -324,7 +333,8 @@ class Table extends React.Component {
 
     let tbody = <tbody>{rows}</tbody>
 
-    let table = <table id='table' className='table'>{thead}{tbody}</table>
+    let tableId = `table-${this.props.modelName}`
+    let table = <table id={tableId} className='table'>{thead}{tbody}</table>
 
     let modalInfo = this.getModalInfo()
 
@@ -332,6 +342,7 @@ class Table extends React.Component {
       <div id='table-wrapper'>
 
         <ControlBar
+          modelName={this.props.modelName}
           data={this.props.data}
           tableSettings={this.props.tableSettings}
           updateTableSettingsOrData={this.props.updateTableSettingsOrData}
@@ -370,9 +381,11 @@ class Table extends React.Component {
 class ControlBar extends React.Component {
   build = () => {
     let elements = []
+    let createButtonId = `create-button-${this.props.modelName}`
 
     if(this.props.enabledFeatures && this.props.enabledFeatures.includes('create')) {
       elements.push(<button
+        id={createButtonId}
         key='create'
         className='btn btn-md glyphicon glyphicon-plus create-button'
         onClick={() => {
@@ -386,6 +399,7 @@ class ControlBar extends React.Component {
 
     if(this.props.enabledFeatures && this.props.enabledFeatures.includes('search')) {
       elements.push(<SearchBox
+        modelName={this.props.modelName}
         key='searchbox'
         data={this.props.data}
         tableSettings={this.props.tableSettings}
@@ -413,8 +427,10 @@ class SearchBox extends React.Component {
   }
 
   render() {
+    let searchBoxId = `search-box-${this.props.modelName}`
     return (
       <input
+        id={searchBoxId}
         type='text'
         className='my-form-control'
         onChange={e => { this.search(e.target.value) }}

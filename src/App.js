@@ -264,6 +264,7 @@ class App extends Component {
     if(this.state.data.length !== 0) {
       return (
         <Table
+          modelName='entry'
           enabledFeatures={[
             'create',
             'view',
@@ -343,7 +344,9 @@ class App extends Component {
               console.log('errors')
               console.log(errors)
             }}
-          />
+          >
+            <button id='entry-create-submit' className='btn btn-info' type='submit'>Submit</button>
+          </Form>
         </div>
       )
     }
@@ -355,6 +358,7 @@ class App extends Component {
         <div id=''>
           <h2>Events view for {this.state.entryWithEventsToUpdate.company}</h2>
           <Table
+            modelName='event'
             enabledFeatures={[
               'create',
               'update',

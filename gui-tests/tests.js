@@ -14,14 +14,28 @@ const newEntryData = {
   company: 'new company',
   description: 'new description',
   jobTitle: 'new jobTitle',
-  notes: 'new notes'
+  notes: 'new notes',
+  events: [
+    'event1',
+    'event2',
+    'event3'
+  ]
 }
 
 const updateEntryData = {
   company: 'update company',
   description: 'update description',
   jobTitle: 'update jobTitle',
-  notes: 'update notes'
+  notes: 'update notes',
+  events: [
+    'udpate1',
+    'udpate2',
+    'udpate3'
+  ]
+}
+
+const selectors = {
+  arrayFieldAddButton: '.btn.btn-info.btn-add.col-xs-12'
 }
 
 describe('Operation Silver', function() {
@@ -32,9 +46,9 @@ describe('Operation Silver', function() {
     browser.url(URL)
     browser.localStorage('POST', { key: 'operation-silver-data', value: JSON.stringify(testBase) })
     browser.localStorage('POST', { key: 'operation-silver-last-id', value: '3'})
-
-    // browser.click('#reload-state-from-local-storage-button')
-    browser.setValue('#reload-state-from-local-storage-input', 'i')
+    browser.waitForExist(`#reload-state-from-local-storage-input`, () => {
+      browser.setValue('#reload-state-from-local-storage-input', 'i')
+    })
   })
 
   it('should work', function() {
@@ -47,46 +61,111 @@ describe('Operation Silver', function() {
     assert.notEqual(title, 'Totally not the title')
   })
 
-  it('can create an entry', () => {
-    let tabs = determineTabs()
-    tabs['New'].click()
-    browser.setValue('#new-form-company', newEntryData.company)
-    browser.setValue('#new-form-description', newEntryData.description)
-    browser.setValue('#new-form-job-title', newEntryData.jobTitle)
-    browser.setValue('#new-form-notes', newEntryData.notes)
-    browser.click('#submit-new-entry')
-    tabs['Table'].click()
+  it('can create an entry using the empty table form', () => {
 
-    browser.waitForExist(`tr[data-entry-company='${testBase.data[0].company}']`, () => {
+    // clear the existing rows so the create form will show
+    browser.click('.button-delete-row')
+    browser.click('.button-delete-row')
+    browser.click('.button-delete-row')
+
+    browser.setValue('#entry_company', newEntryData.company)
+    browser.setValue('#entry_description', newEntryData.description)
+    browser.setValue('#entry_jobTitle', newEntryData.jobTitle)
+    browser.setValue('#entry_notes', newEntryData.notes)
+    
+    newEntryData.events.forEach((eventValue, i) => {
+      browser.click(selectors.arrayFieldAddButton)
+      browser.setValue(`#entry_events_${i}_value`, newEntryData.events[i])
+    })
+
+    browser.click('#entry-create-submit')
+    
+    browser.waitForExist(`tr[data-entry-company='${newEntryData.company}']`, () => {
       assert.equal(browser.isExisting(`tr[data-entry-company='${newEntryData.company}']`), true)
     })
   })
 
+  it('can create an entry using the + button', () => {
+
+    waitThenClick('#create-button-entry', () => {
+      browser.waitForVisible('#entry_company', () => {
+        browser.setValue('#entry_company', newEntryData.company)
+        browser.setValue('#entry_description', newEntryData.description)
+        browser.setValue('#entry_jobTitle', newEntryData.jobTitle)
+        browser.setValue('#entry_notes', newEntryData.notes)
+
+        newEntryData.events.forEach((eventValue, i) => {
+          browser.click(selectors.arrayFieldAddButton)
+          browser.setValue(`#entry_events_${i}_value`, newEntryData.events[i])
+        })
+
+        browser.click('#entry-create-submit')
+
+        browser.waitForExist(`tr[data-entry-company='${newEntryData.company}']`, () => {
+          assert.equal(browser.isExisting(`tr[data-entry-company='${newEntryData.company}']`), true)
+        })
+      })
+    })
+
+  })
+
   it('can update an entry', () => {
-    browser.click(`button.button-update-row[data-entry-id='${testBase.data[0].id}']`)
+    waitThenClick(`button.button-update-row[data-entry-id='${testBase.data[0].id}']`, () => {
+      browser.waitForVisible('#entry_company', () => {
+        browser.setValue('#entry_company', updateEntryData.company)
+        browser.setValue('#entry_description', updateEntryData.description)
+        browser.setValue('#entry_jobTitle', updateEntryData.jobTitle)
+        browser.setValue('#entry_notes', updateEntryData.notes)
 
-    browser.setValue('#update-form-company', updateEntryData.company)
-    browser.setValue('#update-form-description', updateEntryData.description)
-    browser.setValue('#update-form-job-title', updateEntryData.jobTitle)
-    browser.setValue('#update-form-notes', updateEntryData.notes)
-    browser.click('#submit-updated-entry')
+        updateEntryData.events.forEach((eventValue, i) => {
+          browser.setValue(`#entry_events_${i}_value`, updateEntryData.events[i])
+        })
 
-    assert.equal(browser.isExisting(`tr[data-entry-company='${updateEntryData.company}']`), true)
+        browser.click('#entry-update-submit')
+
+        assert.equal(browser.isExisting(`tr[data-entry-company='${updateEntryData.company}']`), true)
+      })
+    })
+
   })
 
   it('can delete an entry', () => {
-    browser.click(`button.button-delete-row[data-entry-id='${testBase.data[0].id}']`)
-
+    waitThenClick(`button.button-delete-row[data-entry-id='${testBase.data[0].id}']`, () => {
+      assert.equal(browser.isExisting(`tr[data-entry-company='${testBase.data[0].company}']`), false)
+    })
     // todo: update when molly guards are added
-
-    assert.equal(browser.isExisting(`tr[data-entry-company='${testBase.data[0].company}']`), false)
   })
 
-
-
-  it('can colum sort', () => {
+  it('can column sort', () => {
+    assert.equal(browser.getAttribute('#table-entry > tbody > tr:first-child', 'data-entry-id'), 1)
     browser.click(`th.column-header[name='company']`)
-    browser.pause(15 * 1000)      
+    assert.equal(browser.getAttribute('#table-entry > tbody > tr:first-child', 'data-entry-id'), 3)
+    browser.click(`th.column-header-sorted[name='company']`)
+    assert.equal(browser.getAttribute('#table-entry > tbody > tr:first-child', 'data-entry-id'), 1)
+  })
+
+  it('can re-order rows', () => {
+    assert.equal(browser.getAttribute('#table-entry > tbody > tr:first-child', 'data-entry-id'), 1)
+    browser.click(`button.button-move-row-up[data-entry-id='2'`)
+    assert.equal(browser.getAttribute('#table-entry > tbody > tr:first-child', 'data-entry-id'), 2)
+    browser.click(`button.button-move-row-up[data-entry-id='1'`)
+    assert.equal(browser.getAttribute('#table-entry > tbody > tr:first-child', 'data-entry-id'), 1)
+  })
+
+  it('can search', () => {
+    assert.equal(getNumberOfRowsInTable('table-entry'), 3)
+
+    browser.setValue('#search-box-entry', 'name')
+    assert.equal(getNumberOfRowsInTable('table-entry'), 3)
+
+    browser.setValue('#search-box-entry', 'name1')
+    assert.equal(getNumberOfRowsInTable('table-entry'), 1)
+
+    browser.setValue('#search-box-entry', 'asdf')
+    assert.equal(getNumberOfRowsInTable('table-entry'), 0)
+    
+    browser.setValue('#search-box-entry', [' ', '\uE003'])
+    assert.equal(getNumberOfRowsInTable('table-entry'), 3)
   })
 
 })
@@ -123,4 +202,15 @@ function determineTabs() {
     obj[x.$('a').getText()] = $$('.tabs-menu-item')[x.index]
   })
   return obj
+}
+
+function waitThenClick(selector, callback=null) {
+  browser.waitForVisible(selector, () => {
+    browser.click(selector)
+    if(callback) callback()
+  })
+}
+
+function getNumberOfRowsInTable(tableId) {
+  return browser.$$(`#${tableId} > tbody > tr`).length
 }

@@ -32,7 +32,7 @@
   to { transform: rotate(360deg); }
 }
 
-#table {
+.table {
   width: 70%;
   float: left;
 }
@@ -120,3 +120,5 @@ td {
 #new-entry-form-wrapper {
   width: 50%;
 }
+
+/*.btn-add::after { content: 'Add'; }*/
